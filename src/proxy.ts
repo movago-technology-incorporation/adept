@@ -19,6 +19,8 @@ export default auth.middleware({
     "/portal",
     "/logo.png",
     "/logo-email.png",
+    "/icon.png",
+    "/apple-icon.png",
     "/api/cron",
   ],
 });
