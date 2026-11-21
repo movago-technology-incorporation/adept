@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+/*
+ * Adept design system — flat, tonal, no shadows or borders.
+ * Surfaces separate by fill (paper → sand → white → navy), spacing and type.
+ */
+:root {
+  --navy: #0b1a2e;
+  --navy-2: #13253f;
+  --navy-3: #1c3150;
+  --ink: #142033;
+  --muted: #5d6878;
+  --paper: #f7f4ee;
+  --sand: #efe9dd;
+  --sand-2: #e5ddcc;
+  --gold: #b8914a;
+  --gold-deep: #8f6d2f;
+  --gold-soft: #ecdcb6;
+  --success: #1f6b47;
+  --success-soft: #e3f0e8;
+  --danger: #9b2c1f;
+  --danger-soft: #f7e4e0;
+  --warn: #8a5a12;
+  --warn-soft: #f6ead2;
+}
+
+@theme inline {
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-navy-3: var(--navy-3);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+  --color-sand-2: var(--sand-2);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-soft: var(--gold-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-feature-settings: "kern", "liga";
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--navy);
+}
+
+.serif {
+  font-family: var(--font-serif), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Tailwind v4 no longer adds pointer cursors to buttons — restore them everywhere. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[type="button"]:not(:disabled),
+[type="submit"]:not(:disabled),
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+button:disabled,
+[type="submit"]:disabled {
+  cursor: not-allowed;
+}
+
+/* Keyboard focus only — visible, but never a decorative border. */
+:where(a, button, [role="button"], summary):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+.hero-surface {
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(184, 145, 74, 0.22), transparent 60%),
+    radial-gradient(700px 400px at -10% 110%, rgba(28, 49, 80, 0.9), transparent 60%),
+    var(--navy);
+}
+
+/* Long-form service pages */
+.prose-adept {
+  color: color-mix(in oklab, var(--ink) 82%, transparent);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+.prose-adept > * + * {
+  margin-top: 1.25rem;
+}
+.prose-adept h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  color: var(--navy);
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 600;
+  margin-top: 3rem;
+}
+.prose-adept h3 {
+  color: var(--navy);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 2.25rem;
+}
+.prose-adept h2 + *,
+.prose-adept h3 + * {
+  margin-top: 0.75rem;
+}
+.prose-adept ul,
+.prose-adept ol {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+.prose-adept ol {
+  counter-reset: item;
+}
+.prose-adept li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+.prose-adept ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0.72em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--gold);
+}
+.prose-adept ol > li {
+  counter-increment: item;
+}
+.prose-adept ol > li::before {
+  content: counter(item);
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+.prose-adept strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes settle {
+  from {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+/* Above-the-fold entrance (hero text). */
+.rise {
+  animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+/* Slow photo settle for hero images. */
+.settle {
+  animation: settle 9s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+/* Stagger helpers for .rise */
+.d1 { --delay: 120ms; }
+.d2 { --delay: 240ms; }
+.d3 { --delay: 360ms; }
+.d4 { --delay: 480ms; }
+.d5 { --delay: 600ms; }
+/* Scroll reveal (see <Reveal>). */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--delay, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .rise,
+  .settle {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,285 @@
+import "server-only";
+import type { Firm } from "./types";
+
+// Branded, email-client-safe templates (tables + inline styles).
+// Same language as the site: navy header, paper canvas, sand panels,
+// pill buttons, serif headings — no borders, no shadows.
+
+const C = {
+  navy: "#0b1a2e",
+  ink: "#142033",
+  muted: "#5d6878",
+  paper: "#f7f4ee",
+  sand: "#efe9dd",
+  gold: "#b8914a",
+  goldSoft: "#ecdcb6",
+  white: "#ffffff",
+};
+const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
+const SANS = "'Source Sans 3', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+
+export function esc(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const nl2br = (s: string) => esc(s).replace(/\r?\n/g, "<br>");
+
+type Block =
+  | { type: "text"; html: string }
+  | { type: "details"; rows: [string, string][] }
+  | { type: "quote"; text: string; label?: string }
+  | { type: "steps"; items: string[] };
+
+export type EmailContent = {
+  preheader: string;
+  eyebrow: string;
+  title: string;
+  greeting?: string;
+  intro: string; // plain text, may contain line breaks
+  blocks?: Block[];
+  cta?: { label: string; href: string };
+  signoff?: string;
+};
+
+function renderBlock(b: Block) {
+  if (b.type === "text") {
+    return `<p style="margin:0 0 18px;font:16px/1.65 ${SANS};color:${C.ink};">${b.html}</p>`;
+  }
+  if (b.type === "details") {
+    const rows = b.rows
+      .filter(([, v]) => v)
+      .map(
+        ([k, v], i, all) => `<tr>
+          <td style="padding:${i === 0 ? "18px" : "6px"} 22px ${i === all.length - 1 ? "18px" : "6px"};font:13px/1.5 ${SANS};color:${C.muted};width:38%;vertical-align:top;">${esc(k)}</td>
+          <td style="padding:${i === 0 ? "18px" : "6px"} 22px ${i === all.length - 1 ? "18px" : "6px"} 0;font:600 15px/1.5 ${SANS};color:${C.navy};vertical-align:top;">${v}</td>
+        </tr>`,
+      )
+      .join("");
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;background:${C.sand};border-radius:18px;margin:4px 0 22px;">${rows}</table>`;
+  }
+  if (b.type === "quote") {
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.paper};border-radius:18px;margin:4px 0 22px;">
+      <tr><td style="padding:20px 22px;">
+        ${b.label ? `<p style="margin:0 0 8px;font:600 11px/1 ${SANS};letter-spacing:.16em;text-transform:uppercase;color:${C.gold};">${esc(b.label)}</p>` : ""}
+        <p style="margin:0;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(b.text)}</p>
+      </td></tr></table>`;
+  }
+  const items = b.items
+    .map(
+      (t, i) => `<tr>
+        <td style="padding:0 14px 14px 0;vertical-align:top;width:28px;">
+          <div style="width:28px;height:28px;border-radius:14px;background:${C.navy};color:${C.goldSoft};font:600 13px/28px ${SANS};text-align:center;">${i + 1}</div>
+        </td>
+        <td style="padding:3px 0 14px;font:15px/1.55 ${SANS};color:${C.ink};vertical-align:top;">${esc(t)}</td>
+      </tr>`,
+    )
+    .join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 12px;">${items}</table>`;
+}
+
+export function renderEmail(content: EmailContent, firm?: Firm | null, logoUrl = "/logo-email.png") {
+  const f = firm ?? null;
+  const cta = content.cta
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 26px;">
+        <tr><td style="border-radius:999px;background:${C.navy};">
+          <a href="${esc(content.cta.href)}" style="display:inline-block;padding:15px 30px;font:600 15px/1 ${SANS};color:${C.white};text-decoration:none;border-radius:999px;">${esc(content.cta.label)}</a>
+        </td></tr></table>`
+    : "";
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<title>${esc(content.title)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  @media (max-width:620px){ .px{padding-left:24px!important;padding-right:24px!important} .h1{font-size:32px!important} }
+  a{color:${C.navy}}
+</style>
+</head>
+<body style="margin:0;padding:0;background:${C.paper};-webkit-text-size-adjust:100%;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${C.paper};">${esc(content.preheader)}&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.paper};">
+<tr><td align="center" style="padding:32px 12px;">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;">
+    <tr><td style="background:${C.navy};border-radius:28px 28px 0 0;padding:28px 44px;" class="px">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:${C.white};border-radius:14px;padding:10px 16px;">
+        <img src="${esc(logoUrl)}" width="150" height="51" alt="Adept Bookkeeping and Tax Services" style="display:block;width:150px;height:auto;border:0;outline:none;text-decoration:none;">
+      </td></tr></table>
+    </td></tr>
+    <tr><td style="background:${C.white};padding:40px 44px 14px;" class="px">
+      <p style="margin:0 0 12px;font:600 11px/1 ${SANS};letter-spacing:.18em;text-transform:uppercase;color:${C.gold};">${esc(content.eyebrow)}</p>
+      <h1 class="h1" style="margin:0 0 22px;font:700 38px/1.1 ${SERIF};color:${C.navy};letter-spacing:-.01em;">${esc(content.title)}</h1>
+      ${content.greeting ? `<p style="margin:0 0 14px;font:16px/1.65 ${SANS};color:${C.ink};">${esc(content.greeting)}</p>` : ""}
+      <p style="margin:0 0 22px;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(content.intro)}</p>
+      ${(content.blocks ?? []).map(renderBlock).join("")}
+      ${cta}
+      <p style="margin:0 0 30px;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(content.signoff ?? "Warm regards,\nThe Adept team")}</p>
+    </td></tr>
+    <tr><td style="background:${C.sand};border-radius:0 0 28px 28px;padding:26px 44px 30px;" class="px">
+      <p style="margin:0 0 6px;font:600 14px/1.5 ${SANS};color:${C.navy};">${esc(f?.name ?? "Adept Bookkeeping Services")}</p>
+      <p style="margin:0;font:13px/1.7 ${SANS};color:${C.muted};">
+        ${f ? `${esc(f.email)} · ${esc(f.phone)}<br>${esc(f.hours)}<br>${esc(f.city)}, ${esc(f.country)}` : ""}
+      </p>
+    </td></tr>
+    <tr><td style="padding:20px 44px 0;font:12px/1.6 ${SANS};color:${C.muted};text-align:center;" class="px">
+      You’re receiving this because you contacted or work with Adept Bookkeeping Services.
+    </td></tr>
+  </table>
+</td></tr>
+</table>
+</body>
+</html>`;
+
+  const text = [
+    content.title,
+    "",
+    content.greeting ?? "",
+    content.intro,
+    ...(content.blocks ?? []).map((b) =>
+      b.type === "details"
+        ? b.rows
+            .filter(([, v]) => v)
+            .map(([k, v]) => `${k}: ${v.replace(/<[^>]+>/g, "")}`)
+            .join("\n")
+        : b.type === "quote"
+          ? `${b.label ? `${b.label}:\n` : ""}${b.text}`
+          : b.type === "steps"
+            ? b.items.map((t, i) => `${i + 1}. ${t}`).join("\n")
+            : b.html.replace(/<[^>]+>/g, ""),
+    ),
+    content.cta ? `${content.cta.label}: ${content.cta.href}` : "",
+    "",
+    content.signoff ?? "Warm regards,\nThe Adept team",
+    "",
+    f ? `${f.name} · ${f.email} · ${f.phone}` : "",
+  ]
+    .filter((line, i, all) => !(line === "" && all[i - 1] === ""))
+    .join("\n");
+
+  return { html, text };
+}
+
+// ── Templates ──────────────────────────────────────────────────────────
+
+const first = (name: string) => name.trim().split(/\s+/)[0] || "there";
+
+export const templates = {
+  welcome: (p: { name: string; portalUrl: string }) => ({
+    subject: "Welcome to your Adept client portal",
+    content: {
+      preheader: "Your secure portal is ready — here’s how to get started.",
+      eyebrow: "Welcome",
+      title: "Your client portal is ready",
+      greeting: `Hi ${first(p.name)},`,
+      intro:
+        "Thanks for creating your Adept account. Your secure portal is where you’ll share documents, see what we need from you, and book time with your bookkeeper.",
+      blocks: [
+        {
+          type: "steps" as const,
+          items: [
+            "Upload bank statements, slips and receipts — they go straight to your private folder.",
+            "Check “Outstanding” for anything we’re waiting on.",
+            "Book a meeting or send us a message whenever you need us.",
+          ],
+        },
+      ],
+      cta: { label: "Open your portal", href: p.portalUrl },
+    },
+  }),
+
+  enquiryReceived: (p: { name: string; interest: string; message: string; kind: "contact" | "filing" }) => ({
+    subject: p.kind === "filing" ? "We’ve received your tax filing request" : "Thanks for contacting Adept",
+    content: {
+      preheader: "We’ll be in touch within one business day.",
+      eyebrow: p.kind === "filing" ? "Tax filing request" : "Message received",
+      title: p.kind === "filing" ? "Your filing request is in" : "Thanks for reaching out",
+      greeting: `Hi ${first(p.name)},`,
+      intro:
+        p.kind === "filing"
+          ? "We’ve received your tax filing request. A coordinator will email you with next steps and a secure way to send your documents. Returns are processed by due date, then first come, first served."
+          : "Thanks for getting in touch with Adept Bookkeeping Services. A member of our team will reply within one business day.",
+      blocks: [
+        { type: "details" as const, rows: [[p.kind === "filing" ? "Return type" : "Interested in", esc(p.interest)]] as [string, string][] },
+        ...(p.message ? [{ type: "quote" as const, label: "Your message", text: p.message }] : []),
+        { type: "text" as const, html: "If anything is urgent, just reply to this email." },
+      ],
+    },
+  }),
+
+  bookingConfirmed: (p: { name: string; topic: string; when: string; duration?: number; meetingUrl: string }) => ({
+    subject: `Confirmed: ${p.topic} with Adept`,
+    content: {
+      preheader: `${p.when} — your video link is inside.`,
+      eyebrow: "Booking confirmed",
+      title: "You’re booked in",
+      greeting: `Hi ${first(p.name)},`,
+      intro: "Your session with Adept is confirmed. Join from any device using the link below — no download needed.",
+      blocks: [
+        {
+          type: "details" as const,
+          rows: [
+            ["Topic", esc(p.topic)],
+            ["When", esc(p.when)],
+            ["Length", p.duration ? `${p.duration} minutes` : ""],
+            ["Where", "Video call"],
+          ] as [string, string][],
+        },
+        {
+          type: "text" as const,
+          html: "Have documents we should look at first? Reply to this email or upload them in your client portal before the call.",
+        },
+      ],
+      cta: { label: "Join video call", href: p.meetingUrl },
+    },
+  }),
+
+  followUp: (p: { name: string; subject: string; body: string; signature: string }) => ({
+    subject: p.subject,
+    content: {
+      preheader: p.body.slice(0, 110),
+      eyebrow: "Adept Bookkeeping Services",
+      title: p.subject,
+      greeting: `Hi ${first(p.name)},`,
+      intro: p.body,
+      signoff: `Best regards,\n${p.signature}`,
+    },
+  }),
+
+  accountDeleted: (p: { name: string }) => ({
+    subject: "Your Adept account has been deleted",
+    content: {
+      preheader: "Your client portal account and files have been removed.",
+      eyebrow: "Account closed",
+      title: "Your account has been deleted",
+      greeting: `Hi ${first(p.name)},`,
+      intro:
+        "As requested, we’ve deleted your Adept client portal account, the documents you uploaded, your messages and any upcoming appointments.\n\nIf this wasn’t you, or you’d like to work with us again, just reply to this email.",
+      signoff: "Thank you for working with us,\nThe Adept team",
+    },
+  }),
+
+  adminAlert: (p: { title: string; summary: string; rows: [string, string][]; message?: string; link?: string }) => ({
+    subject: `[Adept] ${p.title}`,
+    content: {
+      preheader: p.summary,
+      eyebrow: "Studio alert",
+      title: p.title,
+      intro: p.summary,
+      blocks: [
+        { type: "details" as const, rows: p.rows.map(([k, v]) => [k, esc(v)] as [string, string]) },
+        ...(p.message ? [{ type: "quote" as const, label: "Message", text: p.message }] : []),
+      ],
+      cta: p.link ? { label: "Open in Studio", href: p.link } : undefined,
+      signoff: "— Adept Studio",
+    },
+  }),
+};

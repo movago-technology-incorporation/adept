@@ -1,0 +1,36 @@
+import {
+  CalendarDays,
+  ChartColumn,
+  ClipboardList,
+  FileText,
+  FolderOpen,
+  House,
+  Inbox,
+  Landmark,
+  MessagesSquare,
+  MousePointerClick,
+  Receipt,
+  Send,
+  Star,
+  UserRound,
+  Users,
+} from "lucide-react";
+
+// Sidebar icons (Lucide). Keys are referenced by the portal layouts.
+export const iconMap = {
+  home: House,
+  inbox: Inbox,
+  file: FileText,
+  receipt: Receipt,
+  tax: Landmark,
+  chart: ChartColumn,
+  form: ClipboardList,
+  chat: MessagesSquare,
+  calendar: CalendarDays,
+  users: Users,
+  user: UserRound,
+  click: MousePointerClick,
+  send: Send,
+  star: Star,
+  folder: FolderOpen,
+};
