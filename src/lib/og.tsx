@@ -2,13 +2,15 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 import { cacheLife } from "next/cache";
 import { SITE } from "./seo";
 
 // Branded 1200×630 social share images (Open Graph / X / LinkedIn / WhatsApp / iMessage).
 
 export const OG_SIZE = { width: 1200, height: 630 };
-export const OG_CONTENT_TYPE = "image/png";
+// JPEG keeps share images small (~80–120 KB) — WhatsApp and others skip large previews.
+export const OG_CONTENT_TYPE = "image/jpeg";
 
 export type OgPhoto = "hero" | "consult" | "documents" | "accountant" | "calculator" | "reports" | "smallBusiness" | "team";
 
@@ -47,23 +49,15 @@ async function loadOgAssets(photo: OgPhoto) {
   };
 }
 
-export async function ogImage({
-  title,
-  kicker,
-  subtitle,
-  photo = "hero",
-}: {
-  title: string;
-  kicker: string;
-  subtitle: string;
-  photo?: OgPhoto;
-}) {
+async function renderOgJpeg(title: string, kicker: string, subtitle: string, photo: OgPhoto): Promise<Uint8Array> {
+  "use cache";
+  cacheLife("max");
   const { serif, sans, sansSemi, logoSrc, photoSrc } = await loadOgAssets(photo);
   // "\n" in a title forces a line break (e.g. one sentence per line).
   const lines = title.split("\n");
   const longest = Math.max(...lines.map((l) => l.length));
 
-  return new ImageResponse(
+  const png = await new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: "#0b1a2e", fontFamily: "Source Sans 3" }}>
         {/* Photo on the right, blended into navy */}
@@ -120,5 +114,16 @@ export async function ogImage({
         { name: "Source Sans 3", data: sansSemi, weight: 600, style: "normal" },
       ],
     },
-  );
+  ).arrayBuffer();
+
+  const jpg = await sharp(Buffer.from(png)).jpeg({ quality: 84, mozjpeg: true, chromaSubsampling: "4:4:4" }).toBuffer();
+  return new Uint8Array(jpg);
+}
+
+/** Branded share image for a route. Rendered once (cached) and served as JPEG. */
+export async function ogImage(input: { title: string; kicker: string; subtitle: string; photo?: OgPhoto }) {
+  const bytes = await renderOgJpeg(input.title, input.kicker, input.subtitle, input.photo ?? "hero");
+  return new Response(new Uint8Array(bytes), {
+    headers: { "Content-Type": OG_CONTENT_TYPE, "Cache-Control": "public, max-age=31536000, immutable" },
+  });
 }

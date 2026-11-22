@@ -3,8 +3,8 @@ import { pageMeta } from "@/lib/seo";
 import { ContentPage, Highlights, PageHero } from "@/components/site/PageHero";
 
 export const metadata = pageMeta({
-  title: "Tax Planning for Individuals & Businesses in Calgary",
-  description: "Year-round tax planning in Calgary: RRSPs and FHSAs, income splitting, credits, home office and vehicle expenses, and estate strategies — legally lowering what you owe.",
+  title: "Tax Planning for Individuals & Businesses",
+  description: "Year-round tax planning in Calgary: RRSPs and FHSAs, income splitting, credits, home office and vehicle expenses — legally lowering what you owe.",
   path: "/tax/planning",
   keywords: ["tax planning Calgary", "reduce taxes Alberta", "RRSP tax planning", "income splitting Canada"],
 });
@@ -12,7 +12,7 @@ export const metadata = pageMeta({
 export default function TaxPlanningPage() {
   return (
     <>
-      <PageSchema path="/tax/planning" title="Tax Planning for Individuals & Businesses in Calgary" description="Year-round tax planning in Calgary: RRSPs and FHSAs, income splitting, credits, home office and vehicle expenses, and estate strategies — legally lowering what you owe." crumbs={[{"name": "Tax services", "path": "/tax"}]} service="Tax planning" />
+      <PageSchema path="/tax/planning" title="Tax Planning for Individuals & Businesses" description="Year-round tax planning in Calgary: RRSPs and FHSAs, income splitting, credits, home office and vehicle expenses — legally lowering what you owe." crumbs={[{"name": "Tax services", "path": "/tax"}]} service="Tax planning" />
       <PageHero
         image="consult"
         imageAlt="Planning taxes with an Adept advisor"

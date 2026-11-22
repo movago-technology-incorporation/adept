@@ -4,8 +4,8 @@ import { ConsultCard, PageHero } from "@/components/site/PageHero";
 import { Container, Eyebrow } from "@/components/ui/kit";
 
 export const metadata = pageMeta({
-  title: "About Adept — Calgary Bookkeepers & Tax Preparers",
-  description: "Meet Adept Bookkeeping and Tax Services: a Calgary team helping Canadian small businesses and individuals stay organized, compliant and ahead of their finances.",
+  title: "About Us — Calgary Bookkeepers & Tax Preparers",
+  description: "Meet Adept, a Calgary team helping Canadian small businesses and families stay organized, compliant and ahead of their finances.",
   path: "/about",
   keywords: ["about Adept bookkeeping", "Calgary tax preparer"],
 });
@@ -20,7 +20,7 @@ const reasons = [
 export default function AboutPage() {
   return (
     <>
-      <PageSchema path="/about" title="About Adept — Calgary Bookkeepers & Tax Preparers" description="Meet Adept Bookkeeping and Tax Services: a Calgary team helping Canadian small businesses and individuals stay organized, compliant and ahead of their finances." />
+      <PageSchema path="/about" title="About Us — Calgary Bookkeepers & Tax Preparers" description="Meet Adept, a Calgary team helping Canadian small businesses and families stay organized, compliant and ahead of their finances." />
       <PageHero
         image="team"
         imageAlt="The Adept team working through client files together"

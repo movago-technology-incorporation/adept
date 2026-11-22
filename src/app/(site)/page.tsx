@@ -26,8 +26,9 @@ import { Container, Eyebrow, buttonClass } from "@/components/ui/kit";
 
 export const metadata = pageMeta({
   title: "Bookkeeping, Tax & Payroll in Calgary, Alberta",
-  description: "Calgary bookkeeping and tax services for small businesses, sole proprietors and families. Monthly books, T1 and T2 returns, GST/HST and payroll \u2014 accurate, on time and CRA-ready.",
+  description: "Calgary bookkeeping and tax services for small businesses and families: monthly books, T1 and T2 returns, GST/HST and payroll. On time and CRA-ready.",
   path: "/",
+  image: "/opengraph-image",
   keywords: ["Calgary bookkeeping services", "Alberta tax accountant", "small business accountant Calgary"],
 });
 
@@ -76,7 +77,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <PageSchema path="/" title="Bookkeeping, Tax & Payroll in Calgary, Alberta" description="Calgary bookkeeping and tax services for small businesses, sole proprietors and families. Monthly books, T1 and T2 returns, GST/HST and payroll \u2014 accurate, on time and CRA-ready." />
+      <PageSchema path="/" title="Bookkeeping, Tax & Payroll in Calgary, Alberta" description="Calgary bookkeeping and tax services for small businesses and families: monthly books, T1 and T2 returns, GST/HST and payroll. On time and CRA-ready." />
       {/* ── Hero: full-bleed photo ──────────────────────────── */}
       <section className="relative isolate flex min-h-[calc(100svh-5rem)] sm:min-h-[calc(100svh-6rem)] items-center overflow-hidden bg-navy text-white">
         <Image

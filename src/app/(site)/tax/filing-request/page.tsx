@@ -7,7 +7,7 @@ import { Container, buttonClass } from "@/components/ui/kit";
 
 export const metadata = pageMeta({
   title: "Start Your Tax Filing Online",
-  description: "Start your personal tax return with Adept online: complete a secure questionnaire, upload your slips and receipts, and track your return from your client portal.",
+  description: "Start your personal tax return online: complete a secure questionnaire, upload your slips and receipts, and track your return in your Adept client portal.",
   path: "/tax/filing-request",
   keywords: ["file taxes online Calgary", "tax filing request", "online tax questionnaire Canada"],
 });
@@ -29,7 +29,7 @@ const ready = [
 export default function FilingRequestPage() {
   return (
     <>
-      <PageSchema path="/tax/filing-request" title="Start Your Tax Filing Online" description="Start your personal tax return with Adept online: complete a secure questionnaire, upload your slips and receipts, and track your return from your client portal." crumbs={[{"name": "Tax services", "path": "/tax"}]} />
+      <PageSchema path="/tax/filing-request" title="Start Your Tax Filing Online" description="Start your personal tax return online: complete a secure questionnaire, upload your slips and receipts, and track your return in your Adept client portal." crumbs={[{"name": "Tax services", "path": "/tax"}]} />
       <PageHero
         image="documents"
         imageAlt="Preparing tax documents for filing"

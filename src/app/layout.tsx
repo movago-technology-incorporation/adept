@@ -20,8 +20,8 @@ const serif = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
   title: {
-    default: `${SITE.name} | Bookkeeping & Tax in Calgary, Alberta`,
-    template: `%s | ${SITE.name}`,
+    default: "Adept Bookkeeping & Tax Services, Calgary",
+    template: `%s | ${SITE.shortName}`,
   },
   description: SITE.description,
   applicationName: SITE.name,
@@ -36,12 +36,12 @@ export const metadata: Metadata = {
     locale: SITE.locale,
     siteName: SITE.name,
     url: "/",
-    title: `${SITE.name} | Bookkeeping & Tax in Calgary`,
+    title: "Adept Bookkeeping & Tax Services, Calgary",
     description: SITE.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} | Bookkeeping & Tax in Calgary`,
+    title: "Adept Bookkeeping & Tax Services, Calgary",
     description: SITE.description,
   },
   robots: {

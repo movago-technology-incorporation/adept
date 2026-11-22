@@ -1,6 +1,6 @@
 import { OG_CONTENT_TYPE, OG_SIZE, ogImage } from "@/lib/og";
 
-export const alt = "Taxes filed right. Books kept clean. \u2014 Adept Bookkeeping and Tax Services, Calgary";
+export const alt = "Taxes filed right. Books kept clean. — Adept Bookkeeping and Tax Services, Calgary";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 

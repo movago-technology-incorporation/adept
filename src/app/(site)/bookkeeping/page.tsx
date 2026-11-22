@@ -4,7 +4,7 @@ import { ContentPage, Highlights, PageHero } from "@/components/site/PageHero";
 
 export const metadata = pageMeta({
   title: "Small Business Bookkeeping in Calgary",
-  description: "Monthly bookkeeping for Calgary small businesses: reconciliations, receivables, payables, GST/PST remittances and clear financial reports — with a CRA-ready audit trail.",
+  description: "Monthly bookkeeping for Calgary small businesses: reconciliations, payables, receivables, GST remittances and clear reports, with a CRA-ready audit trail.",
   path: "/bookkeeping",
   keywords: ["monthly bookkeeping Calgary", "bookkeeping for small business Alberta", "bank reconciliation services", "QuickBooks Online bookkeeping"],
 });
@@ -12,7 +12,7 @@ export const metadata = pageMeta({
 export default function BookkeepingPage() {
   return (
     <>
-      <PageSchema path="/bookkeeping" title="Small Business Bookkeeping in Calgary" description="Monthly bookkeeping for Calgary small businesses: reconciliations, receivables, payables, GST/PST remittances and clear financial reports — with a CRA-ready audit trail." service="Small business bookkeeping" />
+      <PageSchema path="/bookkeeping" title="Small Business Bookkeeping in Calgary" description="Monthly bookkeeping for Calgary small businesses: reconciliations, payables, receivables, GST remittances and clear reports, with a CRA-ready audit trail." service="Small business bookkeeping" />
       <PageHero
         image="accountant"
         imageAlt="An Adept bookkeeper reconciling a client’s accounts"

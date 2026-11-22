@@ -4,7 +4,7 @@ import { ContentPage, Highlights, PageHero } from "@/components/site/PageHero";
 
 export const metadata = pageMeta({
   title: "Corporate Tax Returns (T2) in Alberta",
-  description: "T2 corporate tax returns for Alberta corporations: financial statements, shareholder loans, salary vs. dividends and on-time filing — even with no tax owing.",
+  description: "T2 returns for Alberta corporations: financial statements, shareholder loans, salary vs. dividends and on-time filing, even with no tax owing.",
   path: "/tax/corporation",
   keywords: ["T2 corporate tax return Calgary", "corporate tax accountant Alberta", "shareholder loan tax", "year-end financial statements"],
 });
@@ -12,7 +12,7 @@ export const metadata = pageMeta({
 export default function CorpTaxPage() {
   return (
     <>
-      <PageSchema path="/tax/corporation" title="Corporate Tax Returns (T2) in Alberta" description="T2 corporate tax returns for Alberta corporations: financial statements, shareholder loans, salary vs. dividends and on-time filing — even with no tax owing." crumbs={[{"name": "Tax services", "path": "/tax"}]} service="Corporate tax return preparation (T2)" />
+      <PageSchema path="/tax/corporation" title="Corporate Tax Returns (T2) in Alberta" description="T2 returns for Alberta corporations: financial statements, shareholder loans, salary vs. dividends and on-time filing, even with no tax owing." crumbs={[{"name": "Tax services", "path": "/tax"}]} service="Corporate tax return preparation (T2)" />
       <PageHero
         image="reports"
         imageAlt="Corporate financial statements on a desk"
