@@ -59,23 +59,29 @@ export async function ogImage({
   photo?: OgPhoto;
 }) {
   const { serif, sans, sansSemi, logoSrc, photoSrc } = await loadOgAssets(photo);
+  // "\n" in a title forces a line break (e.g. one sentence per line).
+  const lines = title.split("\n");
+  const longest = Math.max(...lines.map((l) => l.length));
 
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: "#0b1a2e", fontFamily: "Source Sans 3" }}>
         {/* Photo on the right, blended into navy */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photoSrc} alt="" width={640} height={630} style={{ position: "absolute", right: 0, top: 0, width: 640, height: 630, objectFit: "cover" }} />
+        <img src={photoSrc} alt="" width={760} height={630} style={{ position: "absolute", left: 440, top: 0, width: 760, height: 630, objectFit: "cover" }} />
         <div
           style={{
             position: "absolute",
-            inset: 0,
+            left: 0,
+            top: 0,
+            width: 1200,
+            height: 630,
             display: "flex",
-            background: "linear-gradient(90deg, #0b1a2e 0%, #0b1a2e 46%, rgba(11,26,46,0.86) 62%, rgba(11,26,46,0.25) 100%)",
+            background: "linear-gradient(90deg, #0b1a2e 0%, #0b1a2e 44%, rgba(11,26,46,0.92) 54%, rgba(11,26,46,0.45) 72%, rgba(11,26,46,0.08) 100%)",
           }}
         />
 
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: 760, height: "100%", padding: "56px 64px" }}>
+        <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: 700, height: 630, padding: "52px 64px" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <div style={{ display: "flex", background: "#ffffff", borderRadius: 18, padding: "12px 18px" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -85,10 +91,14 @@ export async function ogImage({
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", color: "#ecdcb6", fontSize: 22, fontWeight: 600, letterSpacing: 4, textTransform: "uppercase" }}>{kicker}</div>
-            <div style={{ display: "flex", marginTop: 14, color: "#ffffff", fontFamily: "Cormorant Garamond", fontSize: title.length > 38 ? 66 : 78, lineHeight: 1.02, letterSpacing: -1 }}>
-              {title}
+            <div style={{ display: "flex", flexDirection: "column", marginTop: 14, color: "#ffffff", fontFamily: "Cormorant Garamond", fontSize: longest > 40 ? 54 : longest > 28 ? 62 : 76, lineHeight: 1.04, letterSpacing: -1, maxWidth: 572 }}>
+              {lines.map((line) => (
+                <div key={line} style={{ display: "flex" }}>
+                  {line}
+                </div>
+              ))}
             </div>
-            <div style={{ display: "flex", marginTop: 22, color: "rgba(255,255,255,0.78)", fontSize: 28, lineHeight: 1.35, maxWidth: 620 }}>{subtitle}</div>
+            <div style={{ display: "flex", marginTop: 20, color: "rgba(255,255,255,0.78)", fontSize: 26, lineHeight: 1.35, maxWidth: 560 }}>{subtitle}</div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 18, color: "rgba(255,255,255,0.72)", fontSize: 22, fontWeight: 600 }}>
