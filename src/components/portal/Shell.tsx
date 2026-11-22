@@ -349,14 +349,14 @@ function Brand({ brand, rail }: { brand: string; rail: boolean }) {
   if (rail) {
     return (
       <Link href="/" aria-label="Adept website" title="Adept website" className="grid h-11 w-14 place-items-center rounded-xl bg-white px-1.5">
-        <Image src="/logo.png" alt="Adept" width={920} height={312} className="h-auto w-full" priority unoptimized />
+        <Image src="/adept-logo.png" alt="Adept" width={1364} height={608} className="h-auto w-full" priority unoptimized />
       </Link>
     );
   }
   return (
     <Link href="/" className="flex min-w-0 items-center gap-3" aria-label="Adept website">
       <span className="grid h-11 shrink-0 place-items-center rounded-xl bg-white px-3">
-        <Image src="/logo.png" alt="Adept Bookkeeping and Tax Services" width={920} height={312} className="h-8 w-auto" priority unoptimized />
+        <Image src="/adept-logo.png" alt="Adept Bookkeeping and Tax Services" width={1364} height={608} className="h-8 w-auto" priority unoptimized />
       </span>
       <span className="truncate rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium tracking-wide text-gold-soft">{brand}</span>
     </Link>

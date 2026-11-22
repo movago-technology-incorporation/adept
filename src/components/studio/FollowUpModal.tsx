@@ -13,7 +13,7 @@ function defaultWhen() {
   return `${todayIso()}T${h}:${mins}`;
 }
 
-/** Schedule an email follow-up, or edit one when `item` is passed. Times are Regina local. */
+/** Schedule an email follow-up, or edit one when `item` is passed. Times are Calgary local. */
 export function FollowUpModal({ open, onClose, leadId, item }: { open: boolean; onClose: () => void; leadId?: string; item?: FollowUp }) {
   const { leads, addFollowUp, updateFollowUp } = useApp();
   const options = leads.filter((l) => l.status !== "won" && l.status !== "lost").map((l) => ({ value: l.id, label: `${l.name} · ${l.email}` }));
@@ -24,7 +24,7 @@ export function FollowUpModal({ open, onClose, leadId, item }: { open: boolean; 
     <Modal
       open={open}
       title={item ? "Edit follow-up" : "Schedule a follow-up"}
-      description={lead ? `Emailed to ${lead.name} (${lead.email}) at the time you choose.` : "Emailed automatically at the time you choose (Regina time)."}
+      description={lead ? `Emailed to ${lead.name} (${lead.email}) at the time you choose.` : "Emailed automatically at the time you choose (Calgary time)."}
       onClose={onClose}
       size="lg"
     >
@@ -55,7 +55,7 @@ export function FollowUpModal({ open, onClose, leadId, item }: { open: boolean; 
           placeholder={"Thanks for your interest in Adept…\n\nThe greeting (“Hi Name,”) and signature are added automatically."}
         />
         <Field
-          label="Send at (Regina time)"
+          label="Send at (Calgary time)"
           name="when"
           type="datetime-local"
           defaultValue={item ? item.scheduledFor.replace(" ", "T") : defaultWhen()}

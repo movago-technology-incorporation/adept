@@ -9,6 +9,7 @@ const groups: PortalGroup[] = [
   {
     title: "Work",
     links: [
+      { href: "/client/tax-return", label: "Tax return", icon: "taxReturn" },
       { href: "/client/outstanding", label: "Outstanding", icon: "inbox" },
       { href: "/client/forms", label: "Forms", icon: "form" },
       { href: "/client/appointments", label: "Appointments", icon: "calendar" },

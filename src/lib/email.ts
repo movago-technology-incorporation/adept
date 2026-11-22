@@ -75,9 +75,25 @@ async function log(mail: Mail, status: string, error?: string) {
   }
 }
 
-/** Public origin of the site, for links inside emails. */
+/** Accepts "example.com", "https://example.com/" etc. and returns "https://example.com". */
+function normalizeOrigin(value: string) {
+  const v = value.trim().replace(/\/+$/, "");
+  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+}
+
+/** Origin of the current request (what the person is looking at right now). */
+export async function requestOrigin() {
+  try {
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host");
+    if (host) return `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
+  } catch {}
+  return null;
+}
+
+/** Public origin of the site, for links and images inside emails. */
 export async function siteUrl() {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, "");
+  if (process.env.APP_URL) return normalizeOrigin(process.env.APP_URL);
   try {
     const h = await headers();
     const host = h.get("x-forwarded-host") ?? h.get("host");

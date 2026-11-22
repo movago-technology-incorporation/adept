@@ -1,4 +1,6 @@
 "use client";
+import { Mail } from "lucide-react";
+import { composeHref } from "@/lib/email-recipients";
 
 import { Pencil } from "lucide-react";
 import { use, useState } from "react";
@@ -49,6 +51,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         }
         actions={
           <>
+            <AddButton variant="gold" onClick={() => router.push(composeHref([{ kind: "lead", id: lead.id }]))}>
+              <Mail className="h-4 w-4" />
+              Email
+            </AddButton>
             <AddButton onClick={() => setModal("meeting")}>Schedule meeting</AddButton>
             <AddButton variant="soft" onClick={() => setModal("proposal")}>
               Proposal

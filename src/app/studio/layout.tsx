@@ -17,9 +17,14 @@ const groups: PortalGroup[] = [
     ],
   },
   {
+    title: "Communication",
+    links: [{ href: "/studio/email", label: "Email", icon: "mail" }],
+  },
+  {
     title: "Delivery",
     links: [
       { href: "/studio/calendar", label: "Calendar", icon: "calendar" },
+      { href: "/studio/tax-returns", label: "Tax returns", icon: "taxReturn" },
       { href: "/studio/proposals", label: "Proposals", icon: "file" },
       { href: "/studio/clients", label: "Clients", icon: "folder" },
     ],

@@ -127,7 +127,7 @@ export default function ReputationPage() {
       />
       <Card title="Message clients receive">
         <p className="rounded-2xl bg-sand p-4 text-sm leading-relaxed text-ink/85">
-          “Thank you for trusting Adept. If we made tax season lighter, a quick Google review helps other Saskatchewan businesses
+          “Thank you for trusting Adept. If we made tax season lighter, a quick Google review helps other Alberta businesses
           find us.”
         </p>
         <p className="mt-3 text-xs break-all text-muted">{reviewUrl}</p>

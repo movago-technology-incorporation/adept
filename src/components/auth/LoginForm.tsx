@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth/client";
 import { Alert, Button, Input, Label, cx } from "@/components/ui/kit";
 
@@ -18,8 +19,11 @@ function friendly(message?: string | null) {
 }
 
 export function LoginForm() {
-  const [mode, setMode] = useState<Mode>("signin");
-  const [email, setEmail] = useState("");
+  // Pre-fill from links like /login?mode=signup&email=…&name=… (e.g. after booking or contacting us).
+  const params = useSearchParams();
+  const [mode, setMode] = useState<Mode>(params.get("mode") === "signup" ? "signup" : "signin");
+  const [email, setEmail] = useState(params.get("email") ?? "");
+  const prefillName = params.get("name") ?? "";
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -119,7 +123,7 @@ export function LoginForm() {
       <form onSubmit={onSubmit} className="mt-8 grid gap-4" noValidate={false}>
         {mode === "signup" ? (
           <Label label="Full name">
-            <Input name="name" required autoComplete="name" />
+            <Input name="name" required autoComplete="name" defaultValue={prefillName} />
           </Label>
         ) : null}
 

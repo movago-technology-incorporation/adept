@@ -15,9 +15,9 @@ import type { FollowUp } from "@/lib/types";
 type Row = FollowUp & { leadName: string; leadEmail: string; state: string };
 const h = columnsFor<Row>();
 
-function reginaNow() {
+function firmNow() {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Regina",
+    timeZone: "America/Edmonton",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -38,7 +38,7 @@ export default function FollowUpPage() {
   const { followUps, leads, sendFollowUp, deleteFollowUp } = useApp();
   const [modal, setModal] = useState<{ item?: FollowUp } | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
-  const [now] = useState(reginaNow);
+  const [now] = useState(firmNow);
 
   const rows = useMemo<Row[]>(
     () =>
@@ -151,7 +151,7 @@ export default function FollowUpPage() {
       <PageHeader
         eyebrow="Pipeline"
         title="Follow-up"
-        description="Scheduled emails to leads. They go out automatically at the time you set (Regina time) from your Adept email address."
+        description="Scheduled emails to leads. They go out automatically at the time you set (Calgary time) from your Adept email address."
         actions={<AddButton onClick={() => setModal({})}>Schedule follow-up</AddButton>}
       />
 

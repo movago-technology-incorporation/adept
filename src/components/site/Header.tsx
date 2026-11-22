@@ -35,7 +35,7 @@ export function Header() {
     <header className={cx("sticky top-0 z-40 transition-colors", scrolled ? "bg-white" : "bg-paper")}>
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-5 sm:h-24 sm:px-8">
         <Link href="/" className="shrink-0" onClick={() => recordClick("/", "Logo")} aria-label="Adept Bookkeeping Services home">
-          <Image src="/logo.png" alt="Adept Bookkeeping Services" width={920} height={312} className="h-14 w-auto sm:h-[72px]" priority unoptimized />
+          <Image src="/adept-logo.png" alt="Adept Bookkeeping Services" width={1364} height={608} className="h-14 w-auto sm:h-[72px]" priority unoptimized />
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-1 text-[15px] text-navy lg:flex">
@@ -47,7 +47,7 @@ export function Header() {
                 active={isActive(item.href)}
                 triggerClassName="rounded-full px-3.5 py-2 hover:bg-sand"
                 items={[
-                  { href: item.href, label: "All tax services" },
+                  { href: item.href, label: "All Tax Services" },
                   ...item.children.map((child) => ({
                     href: child.href,
                     label: child.label,
@@ -72,8 +72,8 @@ export function Header() {
           <ButtonLink href="/login" variant="ghost" size="sm">
             Client login
           </ButtonLink>
-          <ButtonLink href="/book" size="sm" onClick={() => recordClick("/book", "Header · Book a consultation")}>
-            Book a consultation
+          <ButtonLink href="/book" size="sm" onClick={() => recordClick("/book", "Header · Book a free consultation")}>
+            Book a free consultation
           </ButtonLink>
         </div>
 
@@ -93,7 +93,7 @@ export function Header() {
       {open ? (
         <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-navy text-white lg:hidden" role="dialog" aria-modal="true">
           <div className="flex h-20 items-center justify-between px-5">
-            <Image src="/logo.png" alt="Adept" width={920} height={312} className="h-12 w-auto brightness-0 invert" unoptimized />
+            <Image src="/adept-logo.png" alt="Adept" width={1364} height={608} className="h-12 w-auto brightness-0 invert" unoptimized />
             <button
               type="button"
               className="grid h-11 w-11 place-items-center rounded-full bg-white/10"
@@ -146,7 +146,7 @@ export function Header() {
           </nav>
           <div className="mt-auto grid gap-2 p-5">
             <ButtonLink href="/book" variant="gold" size="lg" onClick={() => setOpen(false)}>
-              Book a consultation
+              Book a free consultation
             </ButtonLink>
             <ButtonLink href="/login" variant="light" size="lg" onClick={() => setOpen(false)}>
               Client login

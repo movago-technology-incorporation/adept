@@ -6,13 +6,13 @@ export const nav = [
   { href: "/bookkeeping", label: "Bookkeeping" },
   {
     href: "/tax",
-    label: "Tax services",
+    label: "Tax Services",
     children: [
-      { href: "/tax/individual", label: "Individual tax returns" },
-      { href: "/tax/sole-proprietor", label: "Sole proprietor returns" },
-      { href: "/tax/corporation", label: "Corporation tax returns" },
-      { href: "/tax/planning", label: "Tax planning" },
-      { href: "/tax/filing-request", label: "Tax filing request" },
+      { href: "/tax/individual", label: "Individual Tax Returns" },
+      { href: "/tax/sole-proprietor", label: "Sole Proprietor Tax Returns" },
+      { href: "/tax/corporation", label: "Corporation Tax Returns" },
+      { href: "/tax/planning", label: "Tax Planning" },
+      { href: "/tax/filing-request", label: "Tax Filing Request" },
     ],
   },
   { href: "/payroll", label: "Payroll" },
@@ -26,9 +26,9 @@ export const moreLinks = [
 
 export const serviceLinks = [
   { href: "/bookkeeping", label: "Bookkeeping" },
-  { href: "/tax/individual", label: "Individual tax returns" },
+  { href: "/tax/individual", label: "Individual Tax Returns" },
   { href: "/tax/sole-proprietor", label: "Sole proprietor returns" },
-  { href: "/tax/corporation", label: "Corporation tax returns" },
-  { href: "/tax/planning", label: "Tax planning" },
+  { href: "/tax/corporation", label: "Corporation Tax Returns" },
+  { href: "/tax/planning", label: "Tax Planning" },
   { href: "/payroll", label: "Payroll" },
 ];

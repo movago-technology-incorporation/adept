@@ -17,7 +17,7 @@ export default function NotFound() {
     <main className="flex min-h-screen flex-col bg-paper">
       <header className="mx-auto flex h-20 w-full max-w-6xl items-center px-5 sm:px-8">
         <Link href="/" aria-label="Adept Bookkeeping Services home">
-          <Image src="/logo.png" alt="Adept Bookkeeping Services" width={160} height={54} className="h-10 w-auto" unoptimized />
+          <Image src="/adept-logo.png" alt="Adept Bookkeeping Services" width={1364} height={608} className="h-10 w-auto" unoptimized />
         </Link>
       </header>
 

@@ -60,7 +60,7 @@ export async function notifyEnquiry(
         ["Email", lead.email],
         ["Phone", lead.phone ?? ""],
         ["Business", lead.company ?? ""],
-        [kind === "filing" ? "Return type" : "Interest", lead.interest],
+        [kind === "filing" ? "Return type" : "Starting point", lead.interest],
       ],
       message: lead.notes,
       link: `${base}/studio/leads/${lead.id}`,
@@ -94,7 +94,7 @@ export async function notifyBooking(
       summary: `${b.name} booked ${b.topic.toLowerCase()}.`,
       rows: [
         ["With", `${b.name} (${b.email})`],
-        ["When", fmt("America/Regina")],
+        ["When", fmt("America/Edmonton")],
         ["Length", b.duration ? `${b.duration} min` : ""],
       ],
       link: `${base}/studio/meetings/${b.id}`,
@@ -113,6 +113,20 @@ export async function notifyAccountDeleted(client: { name: string; email: string
       ["Email", client.email],
     ],
     link: `${base}/studio/clients`,
+  });
+}
+
+export async function notifyTaxReturnSubmitted(r: { id: string; year: number; name: string; email: string; clientId: string }, base: string) {
+  await send("tax-return", r.email, templates.taxReturnReceived({ name: r.name, year: r.year, portalUrl: `${base}/client/tax-return` }));
+  await alertAdmin({
+    title: `New ${r.year} tax return submitted`,
+    summary: `${r.name} submitted their ${r.year} personal tax questionnaire.`,
+    rows: [
+      ["Client", r.name],
+      ["Email", r.email],
+      ["Tax year", String(r.year)],
+    ],
+    link: `${base}/studio/tax-returns/${r.id}`,
   });
 }
 
@@ -148,7 +162,7 @@ export async function sendFollowUpNow(id: string) {
 }
 
 /**
- * Sends every queued email follow-up whose time has come (times are Regina local).
+ * Sends every queued email follow-up whose time has come (times are Calgary local).
  * Safe to call concurrently: rows are claimed atomically with SKIP LOCKED.
  */
 export async function processDueFollowUps(limit = 25) {
@@ -156,7 +170,7 @@ export async function processDueFollowUps(limit = 25) {
     WITH due AS (
       SELECT f.id FROM follow_ups f
       WHERE f.status = 'queued' AND f.channel = 'email' AND btrim(f.body) <> ''
-        AND f.scheduled_for <= (now() AT TIME ZONE 'America/Regina')
+        AND f.scheduled_for <= (now() AT TIME ZONE 'America/Edmonton')
       ORDER BY f.scheduled_for
       LIMIT ${limit}
       FOR UPDATE SKIP LOCKED

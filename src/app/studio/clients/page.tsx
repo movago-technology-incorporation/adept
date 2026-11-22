@@ -1,6 +1,7 @@
 "use client";
+import { composeHref } from "@/lib/email-recipients";
 
-import { Pencil } from "lucide-react";
+import { Pencil, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -83,6 +84,9 @@ export default function ClientsPage() {
           meta: { className: "w-px whitespace-nowrap", align: "end" },
           cell: ({ row }) => (
             <span className="flex justify-end gap-1">
+              <IconButton label="Send email" onClick={() => router.push(composeHref([{ kind: "client", id: row.original.id }]))}>
+                <Mail className="h-4 w-4" />
+              </IconButton>
               <IconButton label="Edit" onClick={() => setModal({ item: row.original })}>
 <Pencil className="h-4 w-4" />
 </IconButton>
@@ -91,7 +95,7 @@ export default function ClientsPage() {
           ),
         }),
       ]),
-    [deleteClient],
+    [deleteClient, router],
   );
 
   return (

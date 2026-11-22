@@ -246,3 +246,58 @@ button:disabled,
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ── Rich text (Studio email composer + previews) ─────────────────────── */
+.rte p {
+  margin: 0 0 0.75rem;
+}
+.rte h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 1rem 0 0.5rem;
+  line-height: 1.2;
+}
+.rte h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0.9rem 0 0.4rem;
+}
+.rte ul,
+.rte ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.4rem;
+}
+.rte ul {
+  list-style: disc;
+}
+.rte ol {
+  list-style: decimal;
+}
+.rte li > p {
+  margin: 0 0 0.25rem;
+}
+.rte blockquote {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--paper);
+  border-radius: 0.9rem;
+}
+.rte a {
+  color: var(--navy);
+  text-decoration: underline;
+}
+.rte hr {
+  height: 1px;
+  background: var(--sand-2);
+  margin: 1.2rem 0;
+}
+.rte p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: color-mix(in oklab, var(--muted) 60%, transparent);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

@@ -50,9 +50,9 @@ const services = [
 ];
 
 const audiences = [
-  { href: "/tax/individual", icon: UserRound, title: "Individuals & families", body: "T1 returns, credits and benefits — even if you’ve moved or had no income." },
-  { href: "/tax/sole-proprietor", icon: HandCoins, title: "Sole proprietors", body: "Income tracking, GST registration and advice on when to incorporate." },
   { href: "/tax/corporation", icon: Building2, title: "Corporations", body: "Monthly books, T2 filings, shareholder loans and a clean audit trail." },
+  { href: "/tax/sole-proprietor", icon: HandCoins, title: "Sole proprietors", body: "Income tracking, GST registration and advice on when to incorporate." },
+  { href: "/tax/individual", icon: UserRound, title: "Individuals & families", body: "T1 returns, credits and benefits — even if you’ve moved or had no income." },
 ];
 
 const steps = [
@@ -85,7 +85,7 @@ export default async function HomePage() {
           <div className="max-w-2xl">
             <p className="rise flex items-center gap-2 text-sm font-medium tracking-wide text-gold-soft">
               <ShieldCheck className="h-4 w-4" />
-              Bookkeeping & tax for Canadians · Regina, SK
+              Bookkeeping & tax for Canadians · Calgary, AB
             </p>
             <h1 className="rise d1 serif mt-6 text-5xl leading-[1.02] font-semibold sm:text-7xl lg:text-8xl">
               Taxes filed right.
@@ -132,7 +132,7 @@ export default async function HomePage() {
       <Container className="py-20">
         <Reveal className="max-w-2xl">
           <Eyebrow>Who we help</Eyebrow>
-          <h2 className="serif mt-3 text-4xl font-semibold text-navy sm:text-5xl">Tax and books for every stage</h2>
+          <h2 className="serif mt-3 text-4xl font-semibold text-navy sm:text-5xl">Bookkeeping and Tax services for every stage</h2>
         </Reveal>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {audiences.map(({ href, icon: Icon, title, body }, i) => (

@@ -65,7 +65,7 @@ export default function MeetingPage({ params }: { params: Promise<{ id: string }
           <dl className="grid gap-4 text-sm">
             {[
               ["With", `${apt.name} · ${apt.email}`],
-              ["When", `${formatWhen(apt.date, apt.time)} (Regina time)`],
+              ["When", `${formatWhen(apt.date, apt.time)} (Calgary time)`],
               ["Video link", apt.meetingUrl],
               ["Booked via", apt.calUid ? "Cal.com" : "Adept"],
             ].map(([k, v]) => (

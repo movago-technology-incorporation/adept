@@ -15,7 +15,7 @@ export default function LoginPage() {
         <Image src={photos.hero} alt="" fill priority placeholder="blur" sizes="50vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/80 to-navy/40" aria-hidden />
         <Link href="/" aria-label="Back to Adept home" className="relative inline-flex w-fit rounded-xl bg-white px-3 py-2">
-          <Image src="/logo.png" alt="Adept Bookkeeping Services" width={160} height={54} className="h-9 w-auto" unoptimized />
+          <Image src="/adept-logo.png" alt="Adept Bookkeeping Services" width={1364} height={608} className="h-9 w-auto" unoptimized />
         </Link>
         <div className="relative max-w-md">
           <p className="eyebrow text-gold-soft">Adept portal</p>
@@ -35,7 +35,7 @@ export default function LoginPage() {
       <section className="flex flex-col bg-paper px-5 py-8 sm:px-10">
         <div className="flex items-center justify-between lg:justify-end">
           <Link href="/" className="lg:hidden" aria-label="Back to Adept home">
-            <Image src="/logo.png" alt="Adept" width={130} height={44} className="h-9 w-auto" unoptimized />
+            <Image src="/adept-logo.png" alt="Adept" width={1364} height={608} className="h-9 w-auto" unoptimized />
           </Link>
           <Link href="/" className="text-sm text-muted hover:text-navy">
             ← Back to site

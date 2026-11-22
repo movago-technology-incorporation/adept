@@ -17,11 +17,12 @@ export default auth.middleware({
     "/contact",
     "/login",
     "/portal",
-    "/logo.png",
+    "/adept-logo.png",
     "/logo-email.png",
     "/icon.png",
     "/apple-icon.png",
     "/api/cron",
+    "/api/revalidate",
   ],
 });
 

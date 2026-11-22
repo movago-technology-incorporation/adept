@@ -10,7 +10,7 @@ export default function TaxPlanningPage() {
         imageAlt="Planning taxes with an Adept advisor"
         kicker="Tax services"
         title="Tax planning with a long view."
-        lead="Financial planning through a tax-conscious lens. We use the Income Tax Act and provincial rules — legally — to reduce what you owe, with a clear understanding of Saskatchewan and Regina’s business needs."
+        lead="Financial planning through a tax-conscious lens. We use the Income Tax Act and provincial rules — legally — to reduce what you owe, with a clear understanding of Alberta’s rules and Calgary’s business needs."
         crumbs={[{ href: "/tax", label: "Tax services" }]}
       />
       <ContentPage>

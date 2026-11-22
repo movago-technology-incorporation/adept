@@ -37,7 +37,7 @@ export async function Footer() {
       <section className="bg-navy-2 text-white/70">
         <Container className="grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
           <div>
-            <Image src="/logo.png" alt="Adept Bookkeeping Services" width={150} height={50} className="h-9 w-auto brightness-0 invert" unoptimized />
+            <Image src="/adept-logo.png" alt="Adept Bookkeeping Services" width={1364} height={608} className="h-9 w-auto brightness-0 invert" unoptimized />
             <p className="mt-5 max-w-xs text-sm leading-relaxed">
               Bookkeeping, tax and payroll for small businesses and individuals across Canada. Based in {firm.city}.
             </p>

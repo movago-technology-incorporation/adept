@@ -1,6 +1,7 @@
 "use client";
+import { composeHref } from "@/lib/email-recipients";
 
-import { Pencil } from "lucide-react";
+import { Pencil, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -68,6 +69,9 @@ export default function LeadsPage() {
           meta: { className: "w-px whitespace-nowrap", align: "end" },
           cell: ({ row }) => (
             <span className="flex justify-end gap-1 opacity-70 group-hover:opacity-100">
+              <IconButton label="Send email" onClick={() => router.push(composeHref([{ kind: "lead", id: row.original.id }]))}>
+                <Mail className="h-4 w-4" />
+              </IconButton>
               <IconButton label="Edit" onClick={() => setModal({ item: row.original })}>
 <Pencil className="h-4 w-4" />
 </IconButton>
@@ -76,7 +80,7 @@ export default function LeadsPage() {
           ),
         }),
       ]),
-    [updateLead, deleteLead],
+    [updateLead, deleteLead, router],
   );
 
   const open = leads.filter((l) => l.status !== "won" && l.status !== "lost");

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import * as actions from "@/app/actions";
-import type { BookMeetingInput, BookMeetingResult } from "@/app/actions";
+import type { BookMeetingInput, BookMeetingResult, StaffEmailInput, StaffEmailResult } from "@/app/actions";
 import type {
   Appointment,
   ClickEvent,
@@ -14,6 +14,7 @@ import type {
   Job,
   Lead,
   Proposal,
+  StaffEmail,
   Testimonial,
   ThreadMessage,
 } from "@/lib/types";
@@ -31,6 +32,7 @@ export type AppData = {
   followUps: FollowUp[];
   clicks: ClickEvent[];
   testimonials: Testimonial[];
+  staffEmails: StaffEmail[];
   firm?: Firm;
   viewer?: { name: string; email: string };
 };
@@ -65,6 +67,7 @@ type AppState = AppData & {
   deleteClient: (id: string) => Promise<void>;
   updateProposal: (id: string, patch: Partial<Proposal>) => Promise<void>;
   deleteProposal: (id: string) => Promise<void>;
+  sendStaffEmail: (input: StaffEmailInput) => Promise<StaffEmailResult>;
   addTestimonial: (item: Testimonial) => Promise<void>;
   updateTestimonial: (id: string, patch: Partial<Testimonial>) => Promise<void>;
   deleteTestimonial: (id: string) => Promise<void>;
@@ -88,6 +91,7 @@ const empty: AppData = {
   followUps: [],
   clicks: [],
   testimonials: [],
+  staffEmails: [],
 };
 
 export function AppProvider({
@@ -112,6 +116,7 @@ export function AppProvider({
   const [followUps, setFollowUps] = useState(seed.followUps);
   const [clicks, setClicks] = useState(seed.clicks);
   const [testimonials, setTestimonials] = useState(seed.testimonials);
+  const [staffEmails, setStaffEmails] = useState(seed.staffEmails);
   const firm = seed.firm;
   const viewer = seed.viewer;
 
@@ -145,6 +150,7 @@ export function AppProvider({
       followUps,
       clicks,
       testimonials,
+      staffEmails,
       firm,
       viewer,
       recordClick: (page, cta) => {
@@ -293,6 +299,21 @@ export function AppProvider({
         patchRow(setProposals)(id, patch);
         return persist(actions.updateProposal(id, patch));
       },
+      sendStaffEmail: async (input) => {
+        const result = await actions
+          .sendStaffEmail(input)
+          .catch((): StaffEmailResult => ({ ok: false, error: "Couldn’t reach the server. Please try again.", sent: [] }));
+        if (result.sent.length) {
+          setStaffEmails((prev) => [...result.sent, ...prev]);
+          if (input.postToPortal) {
+            const posted = result.sent
+              .filter((e) => e.status === "sent" && e.clientId)
+              .map((e) => ({ id: `m_em_${e.id}`, clientId: e.clientId!, author: "adept" as const, body: e.subject, at: e.createdAt }));
+            if (posted.length) setMessages((prev) => [...prev, ...posted]);
+          }
+        }
+        return result;
+      },
       deleteProposal: (id) => {
         setProposals((prev) => prev.filter((row) => row.id !== id));
         return persist(actions.deleteProposal(id));
@@ -325,6 +346,7 @@ export function AppProvider({
     proposals,
     syncError,
     testimonials,
+    staffEmails,
     viewer,
   ]);
 

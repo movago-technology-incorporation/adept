@@ -9,6 +9,7 @@ const deny = (status: number, error: string) => NextResponse.json({ success: fal
 export async function GET(request: Request) {
   const viewer = await getViewer();
   if (!viewer) return deny(401, "Please sign in");
+  if (viewer.role === "pending") return deny(403, "Please confirm your email first");
   try {
     const key = new URL(request.url).searchParams.get("key");
     if (key) {
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const viewer = await getViewer();
   if (!viewer) return deny(401, "Please sign in");
+  if (viewer.role === "pending") return deny(403, "Please confirm your email first");
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

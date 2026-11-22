@@ -178,3 +178,51 @@ CREATE INDEX IF NOT EXISTS email_log_created_idx ON email_log (created_at DESC);
 
 -- Set the first time a client signs in to the portal (drives the welcome email).
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS portal_user_id TEXT;
+
+-- ── Account verification ───────────────────────────────────────────────
+-- 6-character code emailed at sign-up; the account stays inactive until confirmed.
+-- Only a hash of the code is stored.
+CREATE TABLE IF NOT EXISTS account_verifications (
+  user_id    TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  code_hash  TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  attempts   INT NOT NULL DEFAULT 0,
+  sent_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ── Studio email ───────────────────────────────────────────────────────
+-- Emails staff send to clients/leads from Studio (one row per recipient).
+CREATE TABLE IF NOT EXISTS staff_emails (
+  id         TEXT PRIMARY KEY,
+  batch_id   TEXT NOT NULL,
+  client_id  TEXT REFERENCES clients(id) ON DELETE SET NULL,
+  lead_id    TEXT,
+  to_name    TEXT NOT NULL,
+  to_email   TEXT NOT NULL,
+  subject    TEXT NOT NULL,
+  html       TEXT NOT NULL,
+  status     TEXT NOT NULL,
+  error      TEXT,
+  sent_by    TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS staff_emails_created_idx ON staff_emails (created_at DESC);
+CREATE INDEX IF NOT EXISTS staff_emails_client_idx ON staff_emails (client_id);
+
+-- ── Personal tax returns (client portal questionnaire) ─────────────────
+-- One per client per tax year. `data` holds the encrypted answers
+-- (AES-256-GCM with TAX_DATA_KEY) — it contains SINs, so it is never stored in plain text.
+CREATE TABLE IF NOT EXISTS tax_returns (
+  id           TEXT PRIMARY KEY,
+  client_id    TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  tax_year     INT NOT NULL,
+  status       TEXT NOT NULL DEFAULT 'draft',   -- draft | submitted (Todo) | in_progress | done
+  current_step INT NOT NULL DEFAULT 0,
+  data         TEXT NOT NULL,
+  submitted_at TIMESTAMPTZ,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (client_id, tax_year)
+);
+CREATE INDEX IF NOT EXISTS tax_returns_status_idx ON tax_returns (status, submitted_at DESC);

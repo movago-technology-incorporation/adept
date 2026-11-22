@@ -19,11 +19,11 @@ export default function ServicesPage() {
           stay organized — so the software works for you, not the other way around.
         </p>
 
-        <h2>Registration with ISC</h2>
+        <h2>Corporate registration in Alberta</h2>
         <p>
-          Incorporation separates personal and business liability. In Saskatchewan, Information Services Corporation runs
-          the corporate registry: name reservation, articles and registration. We guide you through the paperwork and the
-          annual returns that follow.
+          Incorporation separates personal and business liability. In Alberta, incorporations and annual returns are filed with
+          the Alberta Corporate Registry through an authorized registry agent. We guide you through the name search, articles and
+          registration — and keep the annual returns that follow on schedule.
         </p>
 
         <h2>GST/HST filing</h2>

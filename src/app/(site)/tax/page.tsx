@@ -8,7 +8,7 @@ const items = [
   ["/tax/individual", "Individual tax returns", "Year-round T1 preparation, credits and CRA-ready files."],
   ["/tax/sole-proprietor", "Sole proprietor returns", "GST registration, income tracking and incorporation advice."],
   ["/tax/corporation", "Corporation tax returns", "T2 filings, shareholder loans and clean audit trails."],
-  ["/tax/planning", "Tax planning", "Credits, RRSPs, income splitting and Saskatchewan-aware strategy."],
+  ["/tax/planning", "Tax planning", "Credits, RRSPs, income splitting and Alberta-aware strategy."],
 ];
 
 export default function TaxIndexPage() {

@@ -8,7 +8,9 @@ import { notifyClientRegistered, siteUrl } from "../notify";
 
 export type Viewer =
   | { role: "staff"; userId: string; email: string; name: string }
-  | { role: "client"; userId: string; email: string; name: string; clientId: string };
+  | { role: "client"; userId: string; email: string; name: string; clientId: string }
+  /** Registered but hasn't confirmed their email yet — can only reach /verify. */
+  | { role: "pending"; userId: string; email: string; name: string };
 
 /**
  * Who is signing in, resolved once per request.
@@ -26,9 +28,11 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   const base = { userId: user.id, email: user.email, name };
 
   // Session cookies are cached briefly; make sure the login still exists.
-  const [live] = await db()`SELECT role FROM neon_auth."user" WHERE id::text = ${user.id}`;
+  const [live] = await db()`SELECT role, "emailVerified" AS verified FROM neon_auth."user" WHERE id::text = ${user.id}`;
   if (!live) return null;
   if (live.role === "admin") return { role: "staff", ...base };
+  // Accounts stay inactive until the emailed code is confirmed (see /verify).
+  if (!live.verified) return { role: "pending", ...base };
 
   // First portal sign-in for a client Adept already has on file: link the account and welcome them.
   const linked = await db()`
@@ -57,7 +61,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   return { role: "client", ...base, clientId };
 });
 
-export const homeFor = (viewer: Viewer) => (viewer.role === "staff" ? "/studio" : "/client");
+export const homeFor = (viewer: Viewer) => (viewer.role === "staff" ? "/studio" : viewer.role === "pending" ? "/verify" : "/client");
 
 /** For layouts/pages: redirect anyone who shouldn't be here. */
 export async function requirePageRole<R extends Viewer["role"]>(role: R) {
@@ -76,8 +80,10 @@ export async function requireStaff() {
   return viewer;
 }
 
+/** Signed in AND activated (pending accounts are rejected). */
 export async function requireSignedIn() {
   const viewer = await getViewer();
   if (!viewer) throw new AuthError("Please sign in");
+  if (viewer.role === "pending") throw new AuthError("Please confirm your email first");
   return viewer;
 }

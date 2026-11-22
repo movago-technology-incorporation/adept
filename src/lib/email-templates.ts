@@ -33,7 +33,10 @@ type Block =
   | { type: "text"; html: string }
   | { type: "details"; rows: [string, string][] }
   | { type: "quote"; text: string; label?: string }
-  | { type: "steps"; items: string[] };
+  | { type: "steps"; items: string[] }
+  | { type: "code"; code: string; note?: string }
+  /** Pre-sanitized rich text (Studio composer). Never pass unsanitized input. */
+  | { type: "html"; html: string };
 
 export type EmailContent = {
   preheader: string;
@@ -67,6 +70,16 @@ function renderBlock(b: Block) {
       <tr><td style="padding:20px 22px;">
         ${b.label ? `<p style="margin:0 0 8px;font:600 11px/1 ${SANS};letter-spacing:.16em;text-transform:uppercase;color:${C.gold};">${esc(b.label)}</p>` : ""}
         <p style="margin:0;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(b.text)}</p>
+      </td></tr></table>`;
+  }
+  if (b.type === "html") {
+    return `<div style="font:16px/1.65 ${SANS};color:${C.ink};">${b.html}</div>`;
+  }
+  if (b.type === "code") {
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.sand};border-radius:18px;margin:4px 0 22px;">
+      <tr><td align="center" style="padding:26px 16px;">
+        <p style="margin:0;font:700 36px/1.1 'SFMono-Regular',Menlo,Consolas,monospace;letter-spacing:.32em;color:${C.navy};">${esc(b.code)}</p>
+        ${b.note ? `<p style="margin:10px 0 0;font:13px/1.5 ${SANS};color:${C.muted};">${esc(b.note)}</p>` : ""}
       </td></tr></table>`;
   }
   const items = b.items
@@ -119,7 +132,7 @@ export function renderEmail(content: EmailContent, firm?: Firm | null, logoUrl =
       <p style="margin:0 0 12px;font:600 11px/1 ${SANS};letter-spacing:.18em;text-transform:uppercase;color:${C.gold};">${esc(content.eyebrow)}</p>
       <h1 class="h1" style="margin:0 0 22px;font:700 38px/1.1 ${SERIF};color:${C.navy};letter-spacing:-.01em;">${esc(content.title)}</h1>
       ${content.greeting ? `<p style="margin:0 0 14px;font:16px/1.65 ${SANS};color:${C.ink};">${esc(content.greeting)}</p>` : ""}
-      <p style="margin:0 0 22px;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(content.intro)}</p>
+      ${content.intro ? `<p style="margin:0 0 22px;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(content.intro)}</p>` : ""}
       ${(content.blocks ?? []).map(renderBlock).join("")}
       ${cta}
       <p style="margin:0 0 30px;font:16px/1.65 ${SANS};color:${C.ink};">${nl2br(content.signoff ?? "Warm regards,\nThe Adept team")}</p>
@@ -152,7 +165,11 @@ export function renderEmail(content: EmailContent, firm?: Firm | null, logoUrl =
             .join("\n")
         : b.type === "quote"
           ? `${b.label ? `${b.label}:\n` : ""}${b.text}`
-          : b.type === "steps"
+          : b.type === "html"
+            ? b.html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|h2|h3|li|blockquote)>/gi, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\n{3,}/g, "\n\n").trim()
+            : b.type === "code"
+            ? `Your code: ${b.code}${b.note ? `\n${b.note}` : ""}`
+            : b.type === "steps"
             ? b.items.map((t, i) => `${i + 1}. ${t}`).join("\n")
             : b.html.replace(/<[^>]+>/g, ""),
     ),
@@ -208,7 +225,7 @@ export const templates = {
           ? "We’ve received your tax filing request. A coordinator will email you with next steps and a secure way to send your documents. Returns are processed by due date, then first come, first served."
           : "Thanks for getting in touch with Adept Bookkeeping Services. A member of our team will reply within one business day.",
       blocks: [
-        { type: "details" as const, rows: [[p.kind === "filing" ? "Return type" : "Interested in", esc(p.interest)]] as [string, string][] },
+        { type: "details" as const, rows: [[p.kind === "filing" ? "Return type" : "Starting point", esc(p.interest)]] as [string, string][] },
         ...(p.message ? [{ type: "quote" as const, label: "Your message", text: p.message }] : []),
         { type: "text" as const, html: "If anything is urgent, just reply to this email." },
       ],
@@ -251,6 +268,57 @@ export const templates = {
       greeting: `Hi ${first(p.name)},`,
       intro: p.body,
       signoff: `Best regards,\n${p.signature}`,
+    },
+  }),
+
+  /** Free-form email written by staff in Studio. `html` must already be sanitized. */
+  staffMessage: (p: { subject: string; html: string; preheader: string; signature: string }) => ({
+    subject: p.subject,
+    content: {
+      preheader: p.preheader,
+      eyebrow: "Adept Bookkeeping Services",
+      title: p.subject,
+      intro: "",
+      blocks: [{ type: "html" as const, html: p.html }],
+      signoff: `Best regards,\n${p.signature}`,
+    },
+  }),
+
+  taxReturnReceived: (p: { name: string; year: number; portalUrl: string }) => ({
+    subject: `We’ve received your ${p.year} tax return information`,
+    content: {
+      preheader: `Your ${p.year} personal tax questionnaire is in. Here’s what happens next.`,
+      eyebrow: "Tax return submitted",
+      title: `Your ${p.year} return is with us`,
+      greeting: `Hi ${first(p.name)},`,
+      intro: `Thank you — we’ve received your ${p.year} personal income tax questionnaire and supporting documents.`,
+      blocks: [
+        {
+          type: "steps" as const,
+          items: [
+            "We review your answers and documents, and message you in your portal if anything is missing.",
+            "We prepare your return and send it to you for review and signing.",
+            "Once you approve it, we file with the CRA and upload your copy to your portal.",
+          ],
+        },
+        { type: "text" as const, html: "Returns are processed by due date, then first come, first served. Personal invoices are paid in full before filing." },
+      ],
+      cta: { label: "Open your portal", href: p.portalUrl },
+    },
+  }),
+
+  verifyAccount: (p: { name: string; code: string; minutes: number }) => ({
+    subject: `${p.code} is your Adept verification code`,
+    content: {
+      preheader: `Your code is ${p.code}. It expires in ${p.minutes} minutes.`,
+      eyebrow: "Confirm your email",
+      title: "Activate your account",
+      greeting: `Hi ${first(p.name)},`,
+      intro: "Thanks for creating your Adept client portal account. Enter this code to confirm your email and activate your account:",
+      blocks: [
+        { type: "code" as const, code: p.code, note: `Expires in ${p.minutes} minutes` },
+        { type: "text" as const, html: "If you didn’t create an account, you can safely ignore this email — nothing will be activated." },
+      ],
     },
   }),
 

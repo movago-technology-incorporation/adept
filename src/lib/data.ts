@@ -14,6 +14,7 @@ import type {
   Job,
   Lead,
   Proposal,
+  StaffEmail,
   TaxDeadline,
   Testimonial,
   ThreadMessage,
@@ -132,7 +133,7 @@ async function getFollowUps() {
   return clean<FollowUp>(await db()`
     SELECT id, lead_id AS "leadId", channel, subject,
            to_char(scheduled_for, 'YYYY-MM-DD HH24:MI') AS "scheduledFor", status, body,
-           to_char(sent_at AT TIME ZONE 'America/Regina', 'YYYY-MM-DD HH24:MI') AS "sentAt", error
+           to_char(sent_at AT TIME ZONE 'America/Edmonton', 'YYYY-MM-DD HH24:MI') AS "sentAt", error
     FROM follow_ups ORDER BY scheduled_for, id`);
 }
 
@@ -169,11 +170,19 @@ async function syncCalBookings() {
   }
 }
 
+async function getStaffEmails() {
+  return clean<StaffEmail>(await db()`
+    SELECT id, batch_id AS "batchId", client_id AS "clientId", lead_id AS "leadId", to_name AS "toName",
+           to_email AS "toEmail", subject, html, status, error, sent_by AS "sentBy",
+           to_char(created_at AT TIME ZONE 'America/Edmonton', 'YYYY-MM-DD HH24:MI') AS "createdAt"
+    FROM staff_emails ORDER BY created_at DESC LIMIT 500`);
+}
+
 /** Everything the Studio (practice owner) workspace needs. */
 export async function getStudioData() {
   await connection();
   await syncCalBookings();
-  const [leads, clients, documents, forms, messages, appointments, proposals, jobs, followUps, clicks, testimonials] =
+  const [leads, clients, documents, forms, messages, appointments, proposals, jobs, followUps, clicks, testimonials, staffEmails] =
     await Promise.all([
       getLeads(),
       getClients(),
@@ -186,8 +195,9 @@ export async function getStudioData() {
       getFollowUps(),
       getClicks(),
       getTestimonials(),
+      getStaffEmails(),
     ]);
-  return { leads, clients, documents, forms, messages, appointments, proposals, jobs, followUps, clicks, testimonials };
+  return { leads, clients, documents, forms, messages, appointments, proposals, jobs, followUps, clicks, testimonials, staffEmails };
 }
 
 export async function findClientByEmail(email: string): Promise<Client | undefined> {

@@ -35,7 +35,7 @@ export function Scheduler({
   const [day, setDay] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, startLoading] = useTransition();
-  const timeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Regina", []);
+  const timeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Edmonton", []);
   const chip = tone === "white" ? "bg-sand" : "bg-white";
 
   useEffect(() => {

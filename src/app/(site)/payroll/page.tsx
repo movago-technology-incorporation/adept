@@ -10,7 +10,7 @@ export default function PayrollPage() {
         imageAlt="Calculating payroll deductions at a desk"
         kicker="Payroll"
         title="Payroll your team can rely on."
-        lead="Wages, benefits and required deductions — weekly, biweekly, monthly or daily. Based in Regina, we stay current on Saskatchewan labour law and run payroll alongside the rest of your books."
+        lead="Wages, benefits and required deductions — weekly, biweekly, monthly or daily. Based in Calgary, we stay current on Alberta employment standards and run payroll alongside the rest of your books."
       />
       <ContentPage>
         <h2>Fully managed payroll</h2>

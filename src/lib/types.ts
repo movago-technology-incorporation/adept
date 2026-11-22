@@ -143,3 +143,18 @@ export type TaxDeadline = {
   lines: string[];
 };
 
+
+export type StaffEmail = {
+  id: string;
+  batchId: string;
+  clientId?: string;
+  leadId?: string;
+  toName: string;
+  toEmail: string;
+  subject: string;
+  html: string;
+  status: "sent" | "failed";
+  error?: string;
+  sentBy: string;
+  createdAt: string;
+};

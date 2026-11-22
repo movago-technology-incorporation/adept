@@ -1,12 +1,14 @@
 import {
   CalendarDays,
   ChartColumn,
+  ClipboardCheck,
   ClipboardList,
   FileText,
   FolderOpen,
   House,
   Inbox,
   Landmark,
+  Mail,
   MessagesSquare,
   MousePointerClick,
   Receipt,
@@ -33,4 +35,6 @@ export const iconMap = {
   send: Send,
   star: Star,
   folder: FolderOpen,
+  mail: Mail,
+  taxReturn: ClipboardCheck,
 };

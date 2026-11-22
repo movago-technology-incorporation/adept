@@ -48,12 +48,24 @@ export default function ClientHome() {
         <Stat label="Next meeting" value={next ? formatDate(next.date).replace(/, \d{4}$/, "") : "—"} hint={next ? next.time : undefined} />
       </div>
 
+      <Link
+        href="/client/tax-return"
+        className="group flex flex-col gap-4 rounded-3xl bg-gold p-6 text-navy transition-colors hover:bg-gold-soft sm:flex-row sm:items-center sm:justify-between sm:p-8"
+      >
+        <div>
+          <p className="eyebrow text-navy/70">Personal tax return</p>
+          <p className="serif mt-2 text-3xl font-semibold">Complete your tax questionnaire</p>
+          <p className="mt-1 text-navy/75">Answer a few questions and upload your slips — your progress saves automatically.</p>
+        </div>
+        <span className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-navy px-5 font-medium text-white">Open tax return →</span>
+      </Link>
+
       {next ? (
         <div className="flex flex-col gap-4 rounded-3xl bg-navy p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
             <p className="eyebrow text-gold-soft">Next appointment</p>
             <p className="serif mt-2 text-3xl font-semibold">{next.topic}</p>
-            <p className="mt-1 text-white/65">{formatWhen(next.date, next.time)} · Regina time</p>
+            <p className="mt-1 text-white/65">{formatWhen(next.date, next.time)} · Calgary time</p>
           </div>
           <a href={next.meetingUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center rounded-full bg-gold px-5 font-medium text-navy hover:bg-gold-soft">
             Join video call

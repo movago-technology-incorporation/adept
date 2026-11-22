@@ -6,11 +6,19 @@ import { after } from "next/server";
 import { db } from "@/lib/db";
 import { TAGS } from "@/lib/data";
 import { cancelBooking, createBooking, firmDateTime, getAvailability, getEventTypes, meetingLink } from "@/lib/cal";
-import { getViewer, requireSignedIn, requireStaff } from "@/lib/auth/viewer";
+import { AuthError, getViewer, requireSignedIn, requireStaff } from "@/lib/auth/viewer";
 import { purgeClient } from "@/lib/accounts";
+import { checkVerificationCode, ensureVerificationCode } from "@/lib/verification";
+import { htmlToText, sanitizeEmailHtml } from "@/lib/rich-text";
+import { renderEmail, templates } from "@/lib/email-templates";
+import { requestOrigin, sendMail } from "@/lib/email";
+import { getFirm } from "@/lib/data";
+import type { EmailRecipient } from "@/lib/email-recipients";
+import { normalizeReturn, validateAll, type TaxReturnData } from "@/lib/tax-return";
+import { currentStatus, filingYears, saveReturn } from "@/lib/tax-return-server";
 import { deleteObject } from "@/lib/storage";
-import { notifyAccountDeleted, notifyBooking, notifyEnquiry, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
-import type { Appointment, Client, DocumentFile, FollowUp, Job, Lead, Proposal, Testimonial, ThreadMessage } from "@/lib/types";
+import { notifyAccountDeleted, notifyBooking, notifyEnquiry, notifyTaxReturnSubmitted, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
+import type { Appointment, Client, DocumentFile, FollowUp, Job, Lead, Proposal, StaffEmail, Testimonial, ThreadMessage } from "@/lib/types";
 
 // Authorization model
 // - Public (anyone):  createLead, recordClick, getOpenTimes, bookMeeting (as a guest)
@@ -167,7 +175,7 @@ export async function bookMeeting(input: BookMeetingInput): Promise<BookMeetingR
     const booking = await createBooking({
       eventTypeId: type.id,
       start: input.start,
-      attendee: { name: attendee.name, email: attendee.email, timeZone: text(input.timeZone, 64) || "America/Regina" },
+      attendee: { name: attendee.name, email: attendee.email, timeZone: text(input.timeZone, 64) || "America/Edmonton" },
       notes: [topic, text(input.notes, 1000)].filter(Boolean).join(" — "),
       metadata: { topic, ...(leadId ? { leadId } : {}), ...(clientId ? { clientId } : {}) },
     });
@@ -197,7 +205,7 @@ export async function bookMeeting(input: BookMeetingInput): Promise<BookMeetingR
       await db()`UPDATE leads SET status = 'consult booked' WHERE id = ${leadId}`;
     }
     const site = await siteUrl();
-    const tz = text(input.timeZone, 64) || "America/Regina";
+    const tz = text(input.timeZone, 64) || "America/Edmonton";
     after(() =>
       notifyBooking(
         { id: appointment.id, name: attendee.name, email: attendee.email, topic, startIso: booking.start, timeZone: tz, duration: appointment.duration, meetingUrl: appointment.meetingUrl },
@@ -476,4 +484,149 @@ export async function updateProposal(id: string, patch: Partial<Proposal>) {
 export async function deleteProposal(id: string) {
   await requireStaff();
   await db()`DELETE FROM proposals WHERE id = ${id}`;
+}
+
+// ── Account verification (pending accounts) ────────────────────────────
+
+export async function verifyMyAccount(code: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const viewer = await getViewer();
+  if (!viewer) return { ok: false, error: "Please sign in again." };
+  if (viewer.role !== "pending") return { ok: true };
+  return checkVerificationCode(viewer.userId, code);
+}
+
+export async function resendVerificationCode(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const viewer = await getViewer();
+  if (!viewer) return { ok: false, error: "Please sign in again." };
+  if (viewer.role !== "pending") return { ok: true };
+  const result = await ensureVerificationCode({ id: viewer.userId, email: viewer.email, name: viewer.name }, true);
+  if (result.sent) return { ok: true };
+  if (result.reason === "cooldown") return { ok: false, error: "Please wait a minute before requesting another code." };
+  return { ok: false, error: "We couldn’t send the email. Please try again shortly." };
+}
+
+// ── Studio email (staff → clients / leads) ─────────────────────────────
+
+export type StaffEmailInput = { recipients: EmailRecipient[]; subject: string; html: string; postToPortal: boolean };
+export type StaffEmailResult = {
+  ok: boolean;
+  error?: string;
+  sent: StaffEmail[];
+};
+
+/** Renders exactly what a recipient would receive (for the composer's preview). */
+export async function previewStaffEmail(subject: string, html: string, firstName = "Maya") {
+  await requireStaff();
+  const clean = sanitizeEmailHtml(html).replaceAll("{{first_name}}", firstName);
+  const t = templates.staffMessage({ subject: subject || "(No subject)", html: clean, preheader: htmlToText(clean).slice(0, 120), signature: "Adept Bookkeeping Services" });
+  let firm = null;
+  try {
+    firm = await getFirm();
+  } catch {}
+  // Preview in the browser: load the logo from the site being viewed (local dev or production).
+  const origin = (await requestOrigin()) ?? (await siteUrl());
+  return renderEmail(t.content, firm, `${origin}/logo-email.png`).html;
+}
+
+export async function sendStaffEmail(input: StaffEmailInput): Promise<StaffEmailResult> {
+  const viewer = await requireStaff();
+  const subject = text(input.subject, 200);
+  const clean = sanitizeEmailHtml(String(input.html ?? ""));
+  if (!subject) return { ok: false, error: "Add a subject.", sent: [] };
+  if (!htmlToText(clean)) return { ok: false, error: "Write a message.", sent: [] };
+  if (!input.recipients?.length) return { ok: false, error: "Choose at least one recipient.", sent: [] };
+  if (input.recipients.length > 100) return { ok: false, error: "Send to 100 recipients or fewer at a time.", sent: [] };
+
+  // Resolve recipients from the database (never trust client-sent addresses).
+  const clientIds = input.recipients.filter((r) => r.kind === "client").map((r) => r.id);
+  const leadIds = input.recipients.filter((r) => r.kind === "lead").map((r) => r.id);
+  const people = [
+    ...(clientIds.length ? (await db()`SELECT id, name, email FROM clients WHERE id = ANY(${clientIds})`).map((r) => ({ kind: "client" as const, ...r })) : []),
+    ...(leadIds.length ? (await db()`SELECT id, name, email FROM leads WHERE id = ANY(${leadIds})`).map((r) => ({ kind: "lead" as const, ...r })) : []),
+  ] as { kind: "client" | "lead"; id: string; name: string; email: string }[];
+
+  let firm = null;
+  try {
+    firm = await getFirm();
+  } catch {}
+  const logo = `${await siteUrl()}/logo-email.png`;
+  const batchId = `batch_${Date.now()}`;
+  const sent: StaffEmail[] = [];
+
+  for (const [i, person] of people.entries()) {
+    const first = person.name.trim().split(/\s+/)[0] || "there";
+    const body = clean.replaceAll("{{first_name}}", first);
+    const t = templates.staffMessage({ subject, html: body, preheader: htmlToText(body).slice(0, 120), signature: `${viewer.name}\nAdept Bookkeeping Services` });
+    const rendered = renderEmail(t.content, firm, logo);
+    const result = await sendMail({ kind: "staff-email", to: person.email, subject, html: rendered.html, text: rendered.text, replyTo: viewer.email });
+    const row: StaffEmail = {
+      id: `em_${Date.now()}_${i}`,
+      batchId,
+      clientId: person.kind === "client" ? person.id : undefined,
+      leadId: person.kind === "lead" ? person.id : undefined,
+      toName: person.name,
+      toEmail: person.email,
+      subject,
+      html: body,
+      status: result.ok ? "sent" : "failed",
+      error: result.ok ? undefined : result.error,
+      sentBy: viewer.name,
+      createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+    };
+    await db()`
+      INSERT INTO staff_emails (id, batch_id, client_id, lead_id, to_name, to_email, subject, html, status, error, sent_by)
+      VALUES (${row.id}, ${batchId}, ${row.clientId ?? null}, ${row.leadId ?? null}, ${row.toName}, ${row.toEmail}, ${subject},
+              ${body}, ${row.status}, ${row.error ?? null}, ${viewer.name})`;
+    if (result.ok && input.postToPortal && person.kind === "client") {
+      await db()`
+        INSERT INTO messages (id, client_id, author, body, at)
+        VALUES (${`m_em_${row.id}`}, ${person.id}, 'adept', ${`${subject}\n\n${htmlToText(body)}`}, now() AT TIME ZONE 'America/Edmonton')`;
+    }
+    sent.push(row);
+  }
+  const failed = sent.filter((s) => s.status === "failed").length;
+  return { ok: failed === 0, error: failed ? `${failed} of ${sent.length} couldn’t be sent.` : undefined, sent };
+}
+
+// ── Personal tax return questionnaire (client portal) ──────────────────
+
+type TaxActionResult = { ok: true } | { ok: false; error: string; step?: string; errors?: Record<string, string> };
+
+async function requireClientForYear(year: number) {
+  const viewer = await requireSignedIn();
+  if (viewer.role !== "client") throw new AuthError("Only client accounts can file a return here.");
+  if (!filingYears().includes(year)) throw new Error("That tax year isn’t available.");
+  return viewer;
+}
+
+/** Autosave while the client works through the steps. */
+export async function saveTaxReturnDraft(year: number, data: TaxReturnData, step: number): Promise<TaxActionResult> {
+  const viewer = await requireClientForYear(year);
+  if (JSON.stringify(data).length > 300_000) return { ok: false, error: "This return is too large to save." };
+  const status = await currentStatus(viewer.clientId, year);
+  if (status && status !== "draft") return { ok: false, error: "This return has already been submitted." };
+  await saveReturn(viewer.clientId, year, normalizeReturn(data), Math.max(0, Math.min(20, Math.floor(step))), "draft");
+  return { ok: true };
+}
+
+export async function submitTaxReturn(year: number, raw: TaxReturnData): Promise<TaxActionResult> {
+  const viewer = await requireClientForYear(year);
+  const status = await currentStatus(viewer.clientId, year);
+  if (status && status !== "draft") return { ok: false, error: "This return has already been submitted." };
+  const data = normalizeReturn(raw);
+  const problem = validateAll(data);
+  if (problem) return { ok: false, error: "Some answers need attention.", step: problem.step, errors: problem.errors };
+  data.agreement.date = new Date().toISOString().slice(0, 10);
+  const id = await saveReturn(viewer.clientId, year, data, 99, "submitted");
+  const site = await siteUrl();
+  const name = `${data.personal.firstName} ${data.personal.lastName}`.trim();
+  after(() => notifyTaxReturnSubmitted({ id, year, name, email: viewer.email, clientId: viewer.clientId }, site));
+  return { ok: true };
+}
+
+/** Staff workflow status (Todo = submitted, In progress, Done). Reopening returns it to the client as a draft. */
+export async function setTaxReturnStatus(id: string, status: "submitted" | "in_progress" | "done" | "draft") {
+  await requireStaff();
+  if (!["submitted", "in_progress", "done", "draft"].includes(status)) throw new Error("Unknown status");
+  await db()`UPDATE tax_returns SET status = ${status}, updated_at = now() WHERE id = ${id}`;
 }

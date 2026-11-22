@@ -5,7 +5,7 @@
 BEGIN;
 
 INSERT INTO site_settings (key, value) VALUES
-  ('firm', '{"name":"Adept Bookkeeping Services","short":"Adept","email":"Hello@adeptbookkeepingservices.com","phone":"+1 (306) 351-1406","hours":"M-F: 9am-6pm, Sat: 10am-4pm, Sun: Closed","city":"Regina, Saskatchewan","country":"Canada"}'::jsonb)
+  ('firm', '{"name":"Adept Bookkeeping Services","short":"Adept","email":"Hello@adeptbookkeepingservices.com","phone":"+1 (587) 216-1942","hours":"M-F: 9am-6pm, Sat: 10am-4pm, Sun: Closed","city":"Calgary, Alberta","country":"Canada"}'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 
 INSERT INTO tax_deadlines (position, title, lines)
@@ -22,7 +22,7 @@ INSERT INTO testimonials (id, name, role, quote, featured, created_at) VALUES
   ('t1', 'Jide Jokodola', 'Small business owner', 'Adept Bookkeeping Services is really experienced in the delivery of her services. I’ve been patronizing this amazing company since 2024 and I must say they are the best.', true, '2026-01-01 00:00:09'),
   ('t2', 'Bolaji Gift', 'Individual tax client', 'I have an excellent experience with my tax consultant. They are highly professional, always timely and incredibly welcoming. Their expertise made the entire process smooth and stress free. They provided clear guidance, answered all my questions with patience and ensured I got the best possible outcome.', true, '2026-01-01 00:00:08'),
   ('t3', 'Bunmi Obanawu', 'Personal tax filing', 'I used Adept Bookkeeping Services to file my taxes and the whole process was smooth and straightforward. Yemisi was highly responsive and always ready to answer all my questions. I highly recommend them.', true, '2026-01-01 00:00:07'),
-  ('t4', 'Amara Cole', 'Corporation, Regina', 'Monthly books, GST, and payroll land on time. The client portal means I stop chasing email attachments at year-end.', false, '2026-01-01 00:00:06')
+  ('t4', 'Amara Cole', 'Corporation, Calgary', 'Monthly books, GST, and payroll land on time. The client portal means I stop chasing email attachments at year-end.', false, '2026-01-01 00:00:06')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -45,9 +45,9 @@ INSERT INTO follow_ups (id, lead_id, channel, subject, scheduled_for, status) VA
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO click_events (id, at, page, cta, referrer, device, city, lead_id) VALUES
-  ('ck1', '2026-10-23 11:05', '/tax/filing-request', 'Start filing request', 'direct', 'iPhone', 'Regina', 'lead_sloane'),
+  ('ck1', '2026-10-23 11:05', '/tax/filing-request', 'Start filing request', 'direct', 'iPhone', 'Calgary', 'lead_sloane'),
   ('ck2', '2026-10-22 16:18', '/', 'Book a consultation', 'instagram.com', 'Safari / Mac', 'Saskatoon', 'lead_harper'),
-  ('ck3', '2026-10-21 09:42', '/tax/corporation', 'Talk to Adept', 'google.com', 'Chrome', 'Regina', 'lead_eli'),
+  ('ck3', '2026-10-21 09:42', '/tax/corporation', 'Talk to Adept', 'google.com', 'Chrome', 'Calgary', 'lead_eli'),
   ('ck4', '2026-10-20 19:11', '/bookkeeping', 'Learn more', 'facebook.com', 'Android', 'Moose Jaw', NULL)
 ON CONFLICT (id) DO NOTHING;
 

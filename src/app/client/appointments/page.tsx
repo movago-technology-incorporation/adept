@@ -37,7 +37,7 @@ export default function ClientAppointmentsPage() {
                 {upcoming.map((apt) => (
                   <li key={apt.id} className="rounded-2xl bg-paper p-4">
                     <p className="font-medium text-navy">{apt.topic}</p>
-                    <p className="text-sm text-muted">{formatWhen(apt.date, apt.time)} · Regina time</p>
+                    <p className="text-sm text-muted">{formatWhen(apt.date, apt.time)} · Calgary time</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <ButtonLink href={apt.meetingUrl} target="_blank" rel="noreferrer" size="sm">
                         Join call

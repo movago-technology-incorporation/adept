@@ -4,18 +4,31 @@ import { FormEvent, useState } from "react";
 import { PageHero } from "@/components/site/PageHero";
 import { ClockIcon, MailIcon, PhoneIcon } from "@/components/site/Icons";
 import { Dropdown } from "@/components/ui/Dropdown";
-import { Button, ButtonLink, Container, Input, Label, Surface, Textarea } from "@/components/ui/kit";
+import { Alert, Button, ButtonLink, Container, Input, Label, Surface, Textarea } from "@/components/ui/kit";
 import { useApp } from "@/store/app-store";
+import { CreateAccountPrompt } from "@/components/auth/CreateAccountPrompt";
 
 export default function ContactPage() {
   const { firm, addLead, recordClick, syncError } = useApp();
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<{ name: string; email: string } | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSaving(true);
     const data = new FormData(e.currentTarget);
+    const startingPoint = String(data.get("startingPoint") || "");
+    const revenue = String(data.get("revenue") || "");
+    const challenge = String(data.get("challenge") || "").trim();
+    // The dropdowns are custom controls, so the browser can't enforce "required" on them.
+    const missing = [!startingPoint && "where you’re starting from", !revenue && "your annual revenue range"].filter(Boolean);
+    if (missing.length) {
+      setError(`Please choose ${missing.join(" and ")}.`);
+      return;
+    }
+    setError(null);
+    setSaving(true);
     await addLead({
       id: `lead_${Date.now()}`,
       name: String(data.get("name")),
@@ -23,14 +36,20 @@ export default function ContactPage() {
       phone: String(data.get("phone") || ""),
       company: String(data.get("company") || ""),
       source: "Contact form",
-      interest: String(data.get("interest")),
+      interest: startingPoint || "Not specified",
       status: "new",
       lastClick: new Date().toISOString().slice(0, 16).replace("T", " "),
       page: "/contact",
       utm: "form",
-      notes: String(data.get("message")),
+      notes: [
+        revenue ? `Annual revenue: ${revenue}` : "",
+        challenge ? `Biggest financial challenge: ${challenge}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
       createdAt: new Date().toISOString().slice(0, 10),
     });
+    setSubmitted({ name: String(data.get("name")), email: String(data.get("email")) });
     void recordClick("/contact", "Send message");
     setSaving(false);
     setDone(true);
@@ -82,6 +101,11 @@ export default function ContactPage() {
               <p className="mx-auto mt-3 max-w-md text-muted">
                 {syncError ?? "Thanks for reaching out. We’ll be in touch within one business day."}
               </p>
+              {!syncError ? (
+                <div className="mt-10">
+                  <CreateAccountPrompt name={submitted?.name} email={submitted?.email} />
+                </div>
+              ) : null}
               {syncError ? (
                 <Button className="mt-6" onClick={() => setDone(false)}>
                   Try again
@@ -90,34 +114,62 @@ export default function ContactPage() {
             </div>
           ) : (
             <form onSubmit={onSubmit} className="grid gap-5">
-              <h2 className="serif text-3xl font-semibold text-navy">Send a message</h2>
+              <div>
+                <h2 className="serif text-3xl font-semibold text-navy">Send a request</h2>
+                <p className="mt-1 text-sm text-muted">
+                  Tell us a little about your business and we’ll email you a calendar link within one business day.
+                </p>
+              </div>
               <div className="grid gap-5 sm:grid-cols-2">
-                <Label label="Name">
+                <Label label="Your Name *">
                   <Input required name="name" autoComplete="name" />
                 </Label>
-                <Label label="Email">
+                <Label label="Business Name *">
+                  <Input required name="company" autoComplete="organization" />
+                </Label>
+                <Label label="Email Address *">
                   <Input required name="email" type="email" autoComplete="email" />
                 </Label>
-                <Label label="Phone (optional)">
-                  <Input name="phone" type="tel" autoComplete="tel" />
+                <Label label="Phone Number *">
+                  <Input required name="phone" type="tel" autoComplete="tel" />
                 </Label>
-                <Label label="Business (optional)">
-                  <Input name="company" autoComplete="organization" />
+                <Label label="Where are you starting from? *">
+                  <Dropdown
+                    name="startingPoint"
+                    defaultValue=""
+                    options={[
+                      { value: "", label: "Select one..." },
+                      ...[
+                        "My books are behind",
+                        "We’ve outgrown our setup",
+                        "My accountant sent me",
+                        "We want to outsource finance entirely",
+                        "Something else",
+                      ].map((value) => ({ value, label: value })),
+                    ]}
+                  />
+                </Label>
+                <Label label="Annual Revenue Range *">
+                  <Dropdown
+                    name="revenue"
+                    defaultValue=""
+                    options={[
+                      { value: "", label: "Select a range..." },
+                      ...["Under $1M", "$1M–$5M", "$5M–$20M", "$20M–$50M", "Over $50M"].map((value) => ({ value, label: value })),
+                    ]}
+                  />
                 </Label>
               </div>
-              <Label label="I’m interested in">
-                <Dropdown
-                  name="interest"
-                  defaultValue="Bookkeeping"
-                  options={["Bookkeeping", "Tax", "Payroll", "Consultation", "Something else"].map((value) => ({ value, label: value }))}
-                />
+              <Label label="What’s Your Biggest Financial Challenge? *">
+                <Textarea required name="challenge" rows={5} />
               </Label>
-              <Label label="How can we help?">
-                <Textarea required name="message" rows={5} placeholder="Tell us about your business, transaction volume, or what’s on your mind." />
-              </Label>
-              <Button type="submit" size="lg" loading={saving} className="sm:justify-self-start">
-                {saving ? "Sending…" : "Send message"}
-              </Button>
+              {error ? <Alert>{error}</Alert> : null}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <Button type="submit" size="lg" loading={saving}>
+                  {saving ? "Sending…" : "Send my request"}
+                </Button>
+                <p className="text-xs text-muted">We only use these details to arrange your consultation.</p>
+              </div>
             </form>
           )}
         </Surface>

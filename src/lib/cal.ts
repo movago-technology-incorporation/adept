@@ -1,8 +1,8 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 
-/** Adept's calendar lives in Cal.com; the firm works in Regina time. */
-export const FIRM_TZ = "America/Regina";
+/** Adept's calendar lives in Cal.com; the firm works in Calgary time (Mountain, observes DST). */
+export const FIRM_TZ = "America/Edmonton";
 
 const API = "https://api.cal.com/v2";
 
