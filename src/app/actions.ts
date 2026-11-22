@@ -628,18 +628,48 @@ export async function submitTaxReturn(year: number, raw: TaxReturnData): Promise
 export async function setTaxReturnStatus(id: string, status: "submitted" | "in_progress" | "done" | "draft") {
   await requireStaff();
   if (!["submitted", "in_progress", "done", "draft"].includes(status)) throw new Error("Unknown status");
+  if (status === "done") return completeTaxReturn(id);
   await db()`UPDATE tax_returns SET status = ${status}, updated_at = now() WHERE id = ${id} AND status IS DISTINCT FROM ${status}`;
-  if (status !== "done") return { emailed: false };
-  // The client is emailed the first time a return is marked Done only — not again after a staff reopen.
-  const [row] = await db()`
-    UPDATE tax_returns t SET completed_emailed_at = now()
-    FROM clients c
-    WHERE t.id = ${id} AND c.id = t.client_id AND t.completed_emailed_at IS NULL
-    RETURNING t.tax_year AS year, c.name, c.email`;
-  if (row?.email) {
-    const site = await siteUrl();
-    after(() => notifyTaxReturnCompleted({ year: Number(row.year), name: String(row.name ?? ""), email: String(row.email) }, site));
-    return { emailed: true };
+  return { ok: true as const, emailed: false };
+}
+
+/**
+ * Marks a return Done and emails the client (with the filed return PDF attached, if given).
+ * The PDF is uploaded to the client's folder first via /api/storage, then saved to their documents here.
+ * Without a PDF the email goes out only the first time; with a PDF it always goes, so a corrected copy can be re-sent.
+ */
+export async function completeTaxReturn(
+  id: string,
+  pdf?: { key: string; name: string; size: number },
+): Promise<{ ok: true; emailed: boolean } | { ok: false; error: string }> {
+  await requireStaff();
+  const [r] = await db()`
+    SELECT t.client_id AS "clientId", t.tax_year AS year, t.completed_emailed_at AS "emailedAt", c.name, c.email
+    FROM tax_returns t JOIN clients c ON c.id = t.client_id WHERE t.id = ${id}`;
+  if (!r) return { ok: false, error: "Tax return not found." };
+  const year = Number(r.year);
+
+  if (pdf) {
+    if (!pdf.key.startsWith(`clients/${r.clientId}/`) || !/\.pdf$/i.test(pdf.key)) return { ok: false, error: "Attach a PDF from this client’s folder." };
+    const size = pdf.size > 1048576 ? `${(pdf.size / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(pdf.size / 1024))} KB`;
+    await db()`
+      INSERT INTO documents (id, client_id, name, kind, category, size, uploaded_at, storage_key)
+      VALUES (${`doc-${crypto.randomUUID()}`}, ${r.clientId}, ${text(pdf.name, 300)}, 'tax', ${`${year} tax return`}, ${size}, current_date, ${pdf.key})`;
   }
-  return { emailed: false };
+
+  await db()`UPDATE tax_returns SET status = 'done', updated_at = now() WHERE id = ${id} AND status IS DISTINCT FROM 'done'`;
+
+  if (!r.email || (!pdf && r.emailedAt)) return { ok: true, emailed: false };
+  try {
+    const sent = await notifyTaxReturnCompleted(
+      { year, name: String(r.name ?? ""), email: String(r.email), pdf: pdf ? { key: pdf.key, name: pdf.name } : undefined },
+      await siteUrl(),
+    );
+    if (!sent.ok) return { ok: false, error: `The return is marked Done, but the email wasn’t sent: ${sent.error}` };
+  } catch (err) {
+    console.error("Tax return completion email failed:", err);
+    return { ok: false, error: "The return is marked Done, but the email couldn’t be sent. Check email settings and try again." };
+  }
+  await db()`UPDATE tax_returns SET completed_emailed_at = now() WHERE id = ${id}`;
+  return { ok: true, emailed: true };
 }

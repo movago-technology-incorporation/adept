@@ -307,7 +307,7 @@ export const templates = {
     },
   }),
 
-  taxReturnCompleted: (p: { name: string; year: number; portalUrl: string; reviewUrl: string }) => ({
+  taxReturnCompleted: (p: { name: string; year: number; portalUrl: string; reviewUrl: string; attached?: boolean }) => ({
     subject: `Your ${p.year} tax return is complete`,
     content: {
       preheader: `Good news: we’ve finished your ${p.year} personal tax return. A quick review would mean a lot.`,
@@ -319,7 +319,9 @@ export const templates = {
         {
           type: "steps" as const,
           items: [
-            "Your copy of the return and any CRA confirmations will be in your client portal.",
+            p.attached
+              ? "A PDF copy of your return is attached to this email, and saved in your client portal."
+              : "Your copy of the return and any CRA confirmations will be in your client portal.",
             "Keep an eye out for your Notice of Assessment from the CRA, usually within a few weeks.",
             "If the CRA contacts you or anything changes, message us in your portal and we’ll take care of it.",
           ],

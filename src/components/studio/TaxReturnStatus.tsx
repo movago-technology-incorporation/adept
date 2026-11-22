@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { CheckCircle2, CircleDot, ListTodo, MailCheck, PencilLine, Undo2 } from "lucide-react";
 import { setTaxReturnStatus } from "@/app/actions";
 import { cx } from "@/components/ui/kit";
+import { CompleteReturnModal } from "@/components/studio/CompleteReturnModal";
 import type { TaxReturnStatus } from "@/lib/tax-return-server";
 
 const OPTIONS = [
@@ -14,31 +15,62 @@ const OPTIONS = [
 ] as const;
 
 /** Staff workflow tags from the PDF (Todo / In Progress / Done), plus reopening for the client. */
-export function TaxReturnStatusControl({ id, status }: { id: string; status: TaxReturnStatus }) {
+export function TaxReturnStatusControl({
+  id,
+  status,
+  clientId,
+  clientName,
+  email,
+  year,
+}: {
+  id: string;
+  status: TaxReturnStatus;
+  clientId: string;
+  clientName: string;
+  email: string;
+  year: number;
+}) {
   const router = useRouter();
   const [current, setCurrent] = useState(status);
   const [pending, start] = useTransition();
   const [confirmReopen, setConfirmReopen] = useState(false);
   const [emailed, setEmailed] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
   const set = (next: TaxReturnStatus) =>
     start(async () => {
       setCurrent(next);
       setConfirmReopen(false);
-      const res = await setTaxReturnStatus(id, next);
-      setEmailed(res.emailed);
+      await setTaxReturnStatus(id, next);
+      setEmailed(false);
       router.refresh();
     });
 
   return (
     <div className={cx("flex flex-wrap items-center gap-2", pending && "opacity-70")}>
+      <CompleteReturnModal
+        open={completing}
+        onClose={() => setCompleting(false)}
+        onDone={(sent) => {
+          setCompleting(false);
+          setCurrent("done");
+          setEmailed(sent);
+          router.refresh();
+        }}
+        returnId={id}
+        clientId={clientId}
+        clientName={clientName}
+        email={email}
+        year={year}
+        alreadyDone={current === "done"}
+      />
       <div className="flex gap-1 rounded-full bg-white/10 p-1">
         {OPTIONS.map(({ value, label, icon: Icon }) => (
           <button
             key={value}
             type="button"
             disabled={pending || current === "draft"}
-            onClick={() => set(value)}
+            onClick={() => (value === "done" ? setCompleting(true) : set(value))}
             className={cx(
               "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition-colors disabled:opacity-50",
               current === value ? "bg-gold text-navy" : "text-white/75 hover:bg-white/10 hover:text-white",
@@ -50,7 +82,7 @@ export function TaxReturnStatusControl({ id, status }: { id: string; status: Tax
       </div>
       {emailed ? (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm text-gold-soft">
-          <MailCheck className="h-4 w-4" /> Client emailed with a review link
+          <MailCheck className="h-4 w-4" /> Client emailed
         </span>
       ) : null}
       {current === "done" ? (

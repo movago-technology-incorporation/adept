@@ -30,6 +30,7 @@ export type Mail = {
   html: string;
   text: string;
   replyTo?: string;
+  attachments?: { filename: string; content: Buffer; contentType?: string }[];
 };
 
 /**
@@ -53,6 +54,7 @@ export async function sendMail(mail: Mail, { throwOnError = false } = {}) {
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
+      attachments: mail.attachments,
     });
     await log(mail, "sent");
     return { ok: true as const };

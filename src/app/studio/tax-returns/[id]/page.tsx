@@ -28,7 +28,7 @@ export default async function StudioTaxReturnPage({ params }: { params: Promise<
           {r.email} · {r.submittedAt ? `Submitted ${r.submittedAt}` : `Draft, last saved ${r.updatedAt}`}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <TaxReturnStatusControl id={r.id} status={r.status} />
+          <TaxReturnStatusControl id={r.id} status={r.status} clientId={r.clientId} clientName={r.clientName} email={r.email} year={r.taxYear} />
           <Link href={`/studio/clients/${r.clientId}`} className={buttonClass("light", "sm")}>
             <FolderOpen className="h-4 w-4" /> Client folder
           </Link>

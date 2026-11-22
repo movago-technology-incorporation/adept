@@ -1,8 +1,9 @@
 import "server-only";
 import { reviewUrl } from "@/lib/review";
+import { getObjectBuffer } from "@/lib/storage";
 import { db } from "./db";
 import { getFirm } from "./data";
-import { adminEmail, sendMail, siteUrl } from "./email";
+import { adminEmail, sendMail, siteUrl, type Mail } from "./email";
 import { renderEmail, templates } from "./email-templates";
 import type { Firm } from "./types";
 
@@ -14,9 +15,14 @@ async function firm(): Promise<Firm | null> {
   }
 }
 
-async function send(kind: string, to: string, t: { subject: string; content: Parameters<typeof renderEmail>[0] }, opts?: { throwOnError?: boolean; replyTo?: string }) {
+async function send(
+  kind: string,
+  to: string,
+  t: { subject: string; content: Parameters<typeof renderEmail>[0] },
+  opts?: { throwOnError?: boolean; replyTo?: string; attachments?: Mail["attachments"] },
+) {
   const { html, text } = renderEmail(t.content, await firm(), `${await siteUrl()}/logo-email.png`);
-  return sendMail({ kind, to, subject: t.subject, html, text, replyTo: opts?.replyTo }, { throwOnError: opts?.throwOnError });
+  return sendMail({ kind, to, subject: t.subject, html, text, replyTo: opts?.replyTo, attachments: opts?.attachments }, { throwOnError: opts?.throwOnError });
 }
 
 async function alertAdmin(t: Parameters<typeof templates.adminAlert>[0], replyTo?: string) {
@@ -131,8 +137,17 @@ export async function notifyTaxReturnSubmitted(r: { id: string; year: number; na
   });
 }
 
-export async function notifyTaxReturnCompleted(r: { year: number; name: string; email: string }, base: string) {
-  await send("tax-return-done", r.email, templates.taxReturnCompleted({ name: r.name, year: r.year, portalUrl: `${base}/client`, reviewUrl: reviewUrl() }));
+export async function notifyTaxReturnCompleted(
+  r: { year: number; name: string; email: string; pdf?: { key: string; name: string } },
+  base: string,
+) {
+  const attachments = r.pdf ? [{ filename: r.pdf.name, content: await getObjectBuffer(r.pdf.key), contentType: "application/pdf" }] : undefined;
+  return send(
+    "tax-return-done",
+    r.email,
+    templates.taxReturnCompleted({ name: r.name, year: r.year, portalUrl: `${base}/client/documents`, reviewUrl: reviewUrl(), attached: !!r.pdf }),
+    { attachments, throwOnError: true },
+  );
 }
 
 // ── Follow-up pipeline ─────────────────────────────────────────────────

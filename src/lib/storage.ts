@@ -68,6 +68,12 @@ export async function deleteObjectsByPrefix(prefix: string) {
   return removed;
 }
 
+/** Reads a stored file into memory (e.g. to attach it to an email). */
+export async function getObjectBuffer(key: string) {
+  const res = await s3.send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
+  return Buffer.from(await res.Body!.transformToByteArray());
+}
+
 export async function deleteObject(key: string) {
   await s3.send(new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
 }
