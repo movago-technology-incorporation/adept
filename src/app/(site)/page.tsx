@@ -38,24 +38,28 @@ const services = [
     title: "General bookkeeping",
     body: "Stay compliant with Canadian regulations, avoid costly errors, and keep a clear picture of your financial health.",
     photo: photos.accountant,
+    alt: "A bookkeeper reconciling a small business’s monthly accounts",
   },
   {
     href: "/services",
     title: "Clean-up & catch-up",
     body: "Behind on your books? We correct past records and bring every transaction up to date — without pausing your business.",
     photo: photos.reports,
+    alt: "Financial reports being reviewed during a bookkeeping clean-up",
   },
   {
     href: "/tax",
     title: "Tax preparation & filing",
     body: "Personal, self-employed and corporate returns, plus GST/HST filings — prepared carefully and filed on time with the CRA.",
     photo: photos.documents,
+    alt: "Tax slips and documents prepared for a CRA tax return",
   },
   {
     href: "/payroll",
     title: "Payroll",
     body: "Pay runs, source deductions, CRA remittances, T4s and WCB statements, handled every cycle.",
     photo: photos.calculator,
+    alt: "A calculator and payroll records for employee pay runs",
   },
 ];
 
@@ -251,7 +255,7 @@ export default async function HomePage() {
                 <div className="relative aspect-[16/8] overflow-hidden">
                   <Image
                     src={s.photo}
-                    alt=""
+                    alt={s.alt}
                     fill
                     placeholder="blur"
                     sizes="(min-width: 768px) 560px, 100vw"

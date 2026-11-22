@@ -56,7 +56,7 @@ export function DeadlinesSection({ deadlines }: { deadlines: TaxDeadline[] }) {
 
   return (
     <section id="deadlines" className="relative isolate scroll-mt-24 overflow-hidden bg-navy text-white">
-      <Image src={photos.documents} alt="" fill sizes="100vw" className="-z-20 object-cover opacity-15" />
+      <Image src={photos.documents} alt="Canadian tax deadline paperwork and filing documents" fill sizes="100vw" className="-z-20 object-cover opacity-15" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-navy/95 via-navy/90 to-navy" aria-hidden />
 
       <Container className="py-24">

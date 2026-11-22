@@ -13,7 +13,7 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
       <section className="relative hidden flex-col justify-between overflow-hidden bg-navy p-12 text-white lg:flex">
-        <Image src={photos.hero} alt="" fill priority placeholder="blur" sizes="50vw" className="object-cover" />
+        <Image src={photos.hero} alt="An Adept advisor reviewing a client’s finances" fill priority placeholder="blur" sizes="50vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/80 to-navy/40" aria-hidden />
         <Link href="/" aria-label="Back to Adept home" className="relative inline-flex w-fit rounded-xl bg-white px-3 py-2">
           <Image src="/adept-logo.png" alt="Adept Bookkeeping Services" width={1364} height={608} className="h-9 w-auto" unoptimized />
