@@ -1,9 +1,16 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { PageHero } from "@/components/site/PageHero";
 import { BookingFlow } from "@/components/booking/BookingFlow";
 import { Container } from "@/components/ui/kit";
 import { getEventTypes, type EventType } from "@/lib/cal";
 
-export const metadata = { title: "Book a consultation" };
+export const metadata = pageMeta({
+  title: "Book a Free Consultation",
+  description: "Book a free bookkeeping or tax consultation with Adept in Calgary. Pick a time online and get a private video-call link straight away — no obligation.",
+  path: "/book",
+  keywords: ["free tax consultation Calgary", "book an accountant Calgary", "bookkeeping consultation"],
+});
 
 async function loadEventTypes(): Promise<EventType[] | undefined> {
   try {
@@ -18,6 +25,7 @@ export default async function BookPage() {
   const eventTypes = await loadEventTypes();
   return (
     <>
+      <PageSchema path="/book" title="Book a Free Consultation" description="Book a free bookkeeping or tax consultation with Adept in Calgary. Pick a time online and get a private video-call link straight away — no obligation." />
       <PageHero
         image="hero"
         imageAlt="An Adept advisor in a working session with a client"

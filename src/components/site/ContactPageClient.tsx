@@ -8,7 +8,7 @@ import { Alert, Button, ButtonLink, Container, Input, Label, Surface, Textarea }
 import { useApp } from "@/store/app-store";
 import { CreateAccountPrompt } from "@/components/auth/CreateAccountPrompt";
 
-export default function ContactPage() {
+export function ContactPageClient() {
   const { firm, addLead, recordClick, syncError } = useApp();
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);

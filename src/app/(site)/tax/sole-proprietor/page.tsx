@@ -1,10 +1,18 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { ContentPage, PageHero } from "@/components/site/PageHero";
 
-export const metadata = { title: "Sole Proprietor Tax Returns" };
+export const metadata = pageMeta({
+  title: "Sole Proprietor & Self-Employed Tax Returns",
+  description: "Tax returns for sole proprietors and the self-employed in Calgary: business income and expenses, GST/HST registration and advice on when to incorporate.",
+  path: "/tax/sole-proprietor",
+  keywords: ["self-employed tax return Calgary", "sole proprietor taxes Alberta", "T2125 business income", "GST registration small supplier"],
+});
 
 export default function SolePropPage() {
   return (
     <>
+      <PageSchema path="/tax/sole-proprietor" title="Sole Proprietor & Self-Employed Tax Returns" description="Tax returns for sole proprietors and the self-employed in Calgary: business income and expenses, GST/HST registration and advice on when to incorporate." crumbs={[{"name": "Tax services", "path": "/tax"}]} service="Sole proprietor and self-employed tax returns" />
       <PageHero
         image="smallBusiness"
         imageAlt="A sole proprietor serving a customer in their shop"

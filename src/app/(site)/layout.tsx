@@ -1,5 +1,6 @@
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { SiteSchema } from "@/components/seo/JsonLd";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       >
         Skip to content
       </a>
+      <SiteSchema />
       <Header />
       <main id="main" className="flex-1">
         {children}

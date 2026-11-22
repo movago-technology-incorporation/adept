@@ -1,3 +1,4 @@
+import { PRIVATE_METADATA } from "@/lib/seo";
 import { Suspense } from "react";
 import { after } from "next/server";
 import { processDueFollowUps } from "@/lib/notify";
@@ -6,6 +7,9 @@ import { requirePageRole } from "@/lib/auth/viewer";
 import { getStudioData } from "@/lib/data";
 import { AppProvider } from "@/store/app-store";
 
+
+/** Private workspace: never indexed. */
+export const metadata = PRIVATE_METADATA;
 const groups: PortalGroup[] = [
   { title: "Desk", links: [{ href: "/studio", label: "Overview", icon: "home" }] },
   {

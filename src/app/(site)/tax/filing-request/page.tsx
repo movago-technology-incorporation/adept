@@ -1,9 +1,16 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
 import { CalendarClock, FileCheck2, FolderLock, LogIn, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { Container, buttonClass } from "@/components/ui/kit";
 
-export const metadata = { title: "Tax filing request" };
+export const metadata = pageMeta({
+  title: "Start Your Tax Filing Online",
+  description: "Start your personal tax return with Adept online: complete a secure questionnaire, upload your slips and receipts, and track your return from your client portal.",
+  path: "/tax/filing-request",
+  keywords: ["file taxes online Calgary", "tax filing request", "online tax questionnaire Canada"],
+});
 
 const facts = [
   { icon: CalendarClock, title: "Processing order", body: "By due date (April 30 personal, June 15 self-employed), then first come, first served." },
@@ -22,6 +29,7 @@ const ready = [
 export default function FilingRequestPage() {
   return (
     <>
+      <PageSchema path="/tax/filing-request" title="Start Your Tax Filing Online" description="Start your personal tax return with Adept online: complete a secure questionnaire, upload your slips and receipts, and track your return from your client portal." crumbs={[{"name": "Tax services", "path": "/tax"}]} />
       <PageHero
         image="documents"
         imageAlt="Preparing tax documents for filing"

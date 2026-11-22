@@ -1,8 +1,15 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { PageHero } from "@/components/site/PageHero";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { Container } from "@/components/ui/kit";
 
-export const metadata = { title: "Tax Services" };
+export const metadata = pageMeta({
+  title: "Tax Preparation & Filing in Calgary",
+  description: "Personal, self-employed and corporate tax returns in Calgary — prepared carefully, filed on time with the CRA, and backed by a clear audit trail.",
+  path: "/tax",
+  keywords: ["tax preparation Calgary", "income tax services Alberta", "tax return filing Calgary"],
+});
 
 const items = [
   ["/tax/individual", "Individual tax returns", "Year-round T1 preparation, credits and CRA-ready files."],
@@ -14,6 +21,7 @@ const items = [
 export default function TaxIndexPage() {
   return (
     <>
+      <PageSchema path="/tax" title="Tax Preparation & Filing in Calgary" description="Personal, self-employed and corporate tax returns in Calgary — prepared carefully, filed on time with the CRA, and backed by a clear audit trail." service="Tax preparation and filing" />
       <PageHero
         image="documents"
         imageAlt="Reviewing and signing tax documents"

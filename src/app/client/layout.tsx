@@ -1,9 +1,13 @@
+import { PRIVATE_METADATA } from "@/lib/seo";
 import { Suspense } from "react";
 import { PortalShell, PortalSkeleton, type PortalGroup } from "@/components/portal/Shell";
 import { requirePageRole } from "@/lib/auth/viewer";
 import { getClientPortalData } from "@/lib/data";
 import { AppProvider } from "@/store/app-store";
 
+
+/** Private workspace: never indexed. */
+export const metadata = PRIVATE_METADATA;
 const groups: PortalGroup[] = [
   { title: "Home", links: [{ href: "/client", label: "Overview", icon: "home" }] },
   {

@@ -1,3 +1,4 @@
+import { PRIVATE_METADATA } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { photos } from "@/assets/photos";
@@ -6,7 +7,7 @@ import { redirect } from "next/navigation";
 import { getViewer, homeFor } from "@/lib/auth/viewer";
 import { LoginForm } from "@/components/auth/LoginForm";
 
-export const metadata = { title: "Sign in" };
+export const metadata = { title: "Sign in", ...PRIVATE_METADATA };
 
 export default function LoginPage() {
   return (

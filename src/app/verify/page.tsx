@@ -1,3 +1,4 @@
+import { PRIVATE_METADATA } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -5,7 +6,7 @@ import { redirect } from "next/navigation";
 import { getViewer, homeFor } from "@/lib/auth/viewer";
 import { VerifyForm } from "@/components/auth/VerifyForm";
 
-export const metadata = { title: "Confirm your email" };
+export const metadata = { title: "Confirm your email", ...PRIVATE_METADATA };
 
 export default function VerifyPage() {
   return (

@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { BASE_KEYWORDS, SITE, siteOrigin } from "@/lib/seo";
 import { Cormorant_Garamond, Source_Sans_3 } from "next/font/google";
 import { Suspense } from "react";
 import { getFirm, getTestimonials } from "@/lib/data";
@@ -17,17 +18,57 @@ const serif = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteOrigin()),
   title: {
-    default: "Adept Bookkeeping Services",
-    template: "%s · Adept Bookkeeping Services",
+    default: `${SITE.name} | Bookkeeping & Tax in Calgary, Alberta`,
+    template: `%s | ${SITE.name}`,
   },
-  description:
-    "Expert bookkeeping, tax, and payroll services for small businesses and individuals across Canada.",
+  description: SITE.description,
+  applicationName: SITE.name,
+  keywords: BASE_KEYWORDS,
+  authors: [{ name: SITE.name, url: "/" }],
+  creator: SITE.name,
+  publisher: SITE.name,
+  category: "Accounting",
+  alternates: { canonical: "/", languages: { "en-CA": "/" } },
+  openGraph: {
+    type: "website",
+    locale: SITE.locale,
+    siteName: SITE.name,
+    url: "/",
+    title: `${SITE.name} | Bookkeeping & Tax in Calgary`,
+    description: SITE.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name} | Bookkeeping & Tax in Calgary`,
+    description: SITE.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
+  formatDetection: { telephone: true, email: true, address: true },
+  manifest: "/manifest.webmanifest",
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+    ...(process.env.BING_SITE_VERIFICATION ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } } : {}),
+  },
+  other: {
+    "geo.region": `${SITE.country}-${SITE.regionCode}`,
+    "geo.placename": `${SITE.city}, ${SITE.region}`,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: SITE.themeColor,
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable} h-full antialiased`}>
+    <html lang="en-CA" className={`${sans.variable} ${serif.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <Suspense fallback={null}>
           <PublicDataProvider>{children}</PublicDataProvider>

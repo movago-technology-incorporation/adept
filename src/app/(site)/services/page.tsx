@@ -1,10 +1,18 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { ContentPage, PageHero } from "@/components/site/PageHero";
 
-export const metadata = { title: "Other Services" };
+export const metadata = pageMeta({
+  title: "Bookkeeping Clean-Up, Catch-Up, GST/HST & QuickBooks Setup",
+  description: "Behind on your books? Adept handles bookkeeping clean-up and catch-up, GST/HST filing, Alberta corporate registration and QuickBooks Online setup and training.",
+  path: "/services",
+  keywords: ["bookkeeping catch-up Calgary", "bookkeeping clean-up", "GST/HST return filing", "QuickBooks setup Calgary", "Alberta corporate registry"],
+});
 
 export default function ServicesPage() {
   return (
     <>
+      <PageSchema path="/services" title="Bookkeeping Clean-Up, Catch-Up, GST/HST & QuickBooks Setup" description="Behind on your books? Adept handles bookkeeping clean-up and catch-up, GST/HST filing, Alberta corporate registration and QuickBooks Online setup and training." service="Bookkeeping clean-up, catch-up and GST/HST filing" />
       <PageHero
         image="reports"
         imageAlt="Financial reports and a calculator on a desk"

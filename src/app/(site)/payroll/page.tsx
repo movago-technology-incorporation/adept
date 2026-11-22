@@ -1,10 +1,18 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { ContentPage, Highlights, PageHero } from "@/components/site/PageHero";
 
-export const metadata = { title: "Payroll Services" };
+export const metadata = pageMeta({
+  title: "Payroll Services in Calgary",
+  description: "Fully managed payroll for Alberta employers: pay runs, source deductions, CRA remittances, T4s, ROEs and WCB statements — every pay cycle, on time.",
+  path: "/payroll",
+  keywords: ["payroll services Calgary", "Alberta payroll provider", "T4 preparation", "CRA payroll remittances"],
+});
 
 export default function PayrollPage() {
   return (
     <>
+      <PageSchema path="/payroll" title="Payroll Services in Calgary" description="Fully managed payroll for Alberta employers: pay runs, source deductions, CRA remittances, T4s, ROEs and WCB statements — every pay cycle, on time." service="Payroll services" />
       <PageHero
         image="calculator"
         imageAlt="Calculating payroll deductions at a desk"

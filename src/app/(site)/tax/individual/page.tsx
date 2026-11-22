@@ -1,10 +1,18 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { ConsultCard, ContentPage, Highlights, PageHero } from "@/components/site/PageHero";
 
-export const metadata = { title: "Individual Tax Returns" };
+export const metadata = pageMeta({
+  title: "Personal Income Tax Returns (T1) in Calgary",
+  description: "Personal T1 tax returns in Calgary: every credit and deduction claimed, newcomers and non-residents welcome, and year-round support if the CRA comes calling.",
+  path: "/tax/individual",
+  keywords: ["personal tax return Calgary", "T1 tax preparation", "income tax return Alberta", "newcomer tax return Canada"],
+});
 
 export default function IndividualTaxPage() {
   return (
     <>
+      <PageSchema path="/tax/individual" title="Personal Income Tax Returns (T1) in Calgary" description="Personal T1 tax returns in Calgary: every credit and deduction claimed, newcomers and non-residents welcome, and year-round support if the CRA comes calling." crumbs={[{"name": "Tax services", "path": "/tax"}]} service="Personal income tax return preparation (T1)" />
       <PageHero
         image="calculator"
         imageAlt="Working through a personal tax return"

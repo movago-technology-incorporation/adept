@@ -1,12 +1,20 @@
+import { PageSchema } from "@/components/seo/JsonLd";
+import { pageMeta } from "@/lib/seo";
 import { PageHero } from "@/components/site/PageHero";
 import { TestimonialList } from "@/components/site/TestimonialList";
 import { Container } from "@/components/ui/kit";
 
-export const metadata = { title: "Testimonials" };
+export const metadata = pageMeta({
+  title: "Client Reviews & Testimonials",
+  description: "Read what small business owners and families across Canada say about working with Adept Bookkeeping and Tax Services.",
+  path: "/testimonials",
+  keywords: ["Adept bookkeeping reviews", "Calgary accountant reviews"],
+});
 
 export default function TestimonialsPage() {
   return (
     <>
+      <PageSchema path="/testimonials" title="Client Reviews & Testimonials" description="Read what small business owners and families across Canada say about working with Adept Bookkeeping and Tax Services." />
       <PageHero
         image="smallBusiness"
         imageAlt="A happy small business owner with a customer"
