@@ -628,13 +628,15 @@ export async function submitTaxReturn(year: number, raw: TaxReturnData): Promise
 export async function setTaxReturnStatus(id: string, status: "submitted" | "in_progress" | "done" | "draft") {
   await requireStaff();
   if (!["submitted", "in_progress", "done", "draft"].includes(status)) throw new Error("Unknown status");
-  // Only rows whose status actually changes come back, so re-clicking "Done" never emails twice.
+  await db()`UPDATE tax_returns SET status = ${status}, updated_at = now() WHERE id = ${id} AND status IS DISTINCT FROM ${status}`;
+  if (status !== "done") return { emailed: false };
+  // The client is emailed the first time a return is marked Done only — not again after a staff reopen.
   const [row] = await db()`
-    UPDATE tax_returns t SET status = ${status}, updated_at = now()
+    UPDATE tax_returns t SET completed_emailed_at = now()
     FROM clients c
-    WHERE t.id = ${id} AND c.id = t.client_id AND t.status IS DISTINCT FROM ${status}
+    WHERE t.id = ${id} AND c.id = t.client_id AND t.completed_emailed_at IS NULL
     RETURNING t.tax_year AS year, c.name, c.email`;
-  if (status === "done" && row?.email) {
+  if (row?.email) {
     const site = await siteUrl();
     after(() => notifyTaxReturnCompleted({ year: Number(row.year), name: String(row.name ?? ""), email: String(row.email) }, site));
     return { emailed: true };

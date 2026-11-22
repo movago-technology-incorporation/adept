@@ -330,7 +330,7 @@ export const templates = {
         },
         {
           type: "quote" as const,
-          text: "Happy with how it went? A short review helps other Calgary families and small businesses find us. It takes about a minute.",
+          text: "Happy with how it went? A short review helps other individuals and small businesses find us. It takes about a minute.",
         },
       ],
       cta: { label: "Write a review", href: p.reviewUrl },

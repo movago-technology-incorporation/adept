@@ -225,4 +225,6 @@ CREATE TABLE IF NOT EXISTS tax_returns (
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (client_id, tax_year)
 );
+-- When the "return done" email was sent (sent once, even if staff reopen and re-complete).
+ALTER TABLE tax_returns ADD COLUMN IF NOT EXISTS completed_emailed_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS tax_returns_status_idx ON tax_returns (status, submitted_at DESC);
