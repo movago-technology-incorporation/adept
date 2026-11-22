@@ -498,7 +498,7 @@ export function TaxReturnWizard({ year, initial, initialStep = 0 }: { year: numb
           onClose={() => setCraOpen(false)}
         />
         {data.supporting.preparedByAdept === "no" ? (
-          <Group title="Previous year’s personal income tax return (T1)" required>
+          <Group title="Previous year’s personal income tax return (T1), if you have it">
             <DocUpload category={`${year} tax return`} field="supporting.priorT1" docs={data.supporting.priorT1} error={err("supporting.priorT1")} onChange={(docs) => update((d) => (d.supporting.priorT1 = docs))} label="Upload last year’s T1" />
           </Group>
         ) : null}

@@ -389,8 +389,6 @@ export function validateStep(step: StepId, d: TaxReturnData): Errors {
     case "supporting": {
       yn(e, d.supporting.preparedByAdept, "supporting.preparedByAdept");
       if (d.supporting.preparedByAdept === "no") yn(e, d.supporting.craRepAdded, "supporting.craRepAdded", "Let us know whether you’ve added Adept as your CRA representative.");
-      if (d.supporting.preparedByAdept === "no" && !d.supporting.priorT1.length)
-        e["supporting.priorT1"] = "Upload last year’s return, since Adept didn’t prepare it.";
       break;
     }
     case "review": {
