@@ -66,7 +66,7 @@ export type TaxReturnData = {
   deductions: Record<string, ChecklistItem>;
   childcareProvider: { name: string; sin: string };
   credits: Record<string, ChecklistItem>;
-  supporting: { preparedByAdept: YesNo; priorT1: DocRef[]; noa: DocRef[]; nora: DocRef[] };
+  supporting: { preparedByAdept: YesNo; /** Client added Adept (RepID TJ2D6CP, Level 2) on CRA My Account. */ craRepAdded: YesNo; priorT1: DocRef[]; noa: DocRef[]; nora: DocRef[] };
   agreement: { agreed: boolean; firstName: string; lastName: string; date: string };
 };
 
@@ -199,7 +199,7 @@ export function emptyReturn(prefill?: { firstName?: string; lastName?: string; e
     deductions: items(DEDUCTION_ITEMS),
     childcareProvider: { name: "", sin: "" },
     credits: items(CREDIT_ITEMS),
-    supporting: { preparedByAdept: "", priorT1: [], noa: [], nora: [] },
+    supporting: { preparedByAdept: "", craRepAdded: "", priorT1: [], noa: [], nora: [] },
     agreement: { agreed: false, firstName: "", lastName: "", date: "" },
   };
 }
@@ -388,6 +388,7 @@ export function validateStep(step: StepId, d: TaxReturnData): Errors {
       break;
     case "supporting": {
       yn(e, d.supporting.preparedByAdept, "supporting.preparedByAdept");
+      if (d.supporting.preparedByAdept === "no") yn(e, d.supporting.craRepAdded, "supporting.craRepAdded", "Let us know whether you’ve added Adept as your CRA representative.");
       if (d.supporting.preparedByAdept === "no" && !d.supporting.priorT1.length)
         e["supporting.priorT1"] = "Upload last year’s return, since Adept didn’t prepare it.";
       break;

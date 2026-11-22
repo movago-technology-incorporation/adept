@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { BASE_KEYWORDS, SITE, siteOrigin } from "@/lib/seo";
 import { Cormorant_Garamond, Source_Sans_3 } from "next/font/google";
-import { Suspense } from "react";
 import { getFirm, getTestimonials } from "@/lib/data";
 import { AppProvider } from "@/store/app-store";
 import "./globals.css";
@@ -70,9 +69,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-CA" className={`${sans.variable} ${serif.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <Suspense fallback={null}>
-          <PublicDataProvider>{children}</PublicDataProvider>
-        </Suspense>
+        {/* No Suspense here: cached data resolves in the static shell, so crawlers get the full page HTML. */}
+        <PublicDataProvider>{children}</PublicDataProvider>
       </body>
     </html>
   );

@@ -307,6 +307,36 @@ export const templates = {
     },
   }),
 
+  taxReturnCompleted: (p: { name: string; year: number; portalUrl: string; reviewUrl: string }) => ({
+    subject: `Your ${p.year} tax return is complete`,
+    content: {
+      preheader: `Good news: we’ve finished your ${p.year} personal tax return. A quick review would mean a lot.`,
+      eyebrow: "Tax return complete",
+      title: `Your ${p.year} return is done`,
+      greeting: `Hi ${first(p.name)},`,
+      intro: `Good news: we’ve completed your ${p.year} personal income tax return. Thank you for trusting Adept with it.`,
+      blocks: [
+        {
+          type: "steps" as const,
+          items: [
+            "Your copy of the return and any CRA confirmations will be in your client portal.",
+            "Keep an eye out for your Notice of Assessment from the CRA, usually within a few weeks.",
+            "If the CRA contacts you or anything changes, message us in your portal and we’ll take care of it.",
+          ],
+        },
+        {
+          type: "text" as const,
+          html: `<a href="${p.portalUrl}" style="color:#0b1a2e;font-weight:600;">Open your client portal</a> to see your documents and messages.`,
+        },
+        {
+          type: "quote" as const,
+          text: "Happy with how it went? A short review helps other Calgary families and small businesses find us. It takes about a minute.",
+        },
+      ],
+      cta: { label: "Write a review", href: p.reviewUrl },
+    },
+  }),
+
   verifyAccount: (p: { name: string; code: string; minutes: number }) => ({
     subject: `${p.code} is your Adept verification code`,
     content: {

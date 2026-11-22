@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check, CloudCheck, CloudOff, LoaderCircle, Lock,
 import { saveTaxReturnDraft, submitTaxReturn } from "@/app/actions";
 import { Alert, Button, buttonClass, cx } from "@/components/ui/kit";
 import { TaxReturnSummary } from "@/components/tax/TaxReturnSummary";
+import { CRA_REP_ID, CraRepModal } from "@/components/tax/CraRepModal";
 import {
   CheckCard,
   DateField,
@@ -58,6 +59,7 @@ export function TaxReturnWizard({ year, initial, initialStep = 0 }: { year: numb
     return resume;
   });
   const [showErrors, setShowErrors] = useState(false);
+  const [craOpen, setCraOpen] = useState(false);
   const [save, setSave] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -464,7 +466,36 @@ export function TaxReturnWizard({ year, initial, initialStep = 0 }: { year: numb
           field="supporting.preparedByAdept"
           value={data.supporting.preparedByAdept}
           error={err("supporting.preparedByAdept")}
-          onChange={(v) => update((d) => (d.supporting.preparedByAdept = v))}
+          onChange={(v) => {
+            update((d) => (d.supporting.preparedByAdept = v));
+            if (v === "no") setCraOpen(true);
+          }}
+        />
+        {data.supporting.preparedByAdept === "no" ? (
+          <div className={cx("flex flex-col gap-4 rounded-3xl p-5 sm:flex-row sm:items-center sm:justify-between", err("supporting.craRepAdded") ? "bg-danger-soft/60" : data.supporting.craRepAdded === "yes" ? "bg-success-soft" : "bg-gold/15")} data-field="supporting.craRepAdded">
+            <div className="flex gap-3">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-navy" />
+              <div>
+                <p className="font-semibold text-navy">
+                  {data.supporting.craRepAdded === "yes"
+                    ? "Thanks, you’ve added Adept as your CRA representative."
+                    : `Add Adept as your CRA representative (RepID ${CRA_REP_ID}, Level 2).`}
+                </p>
+                <p className="mt-0.5 text-sm text-muted">
+                  {err("supporting.craRepAdded") ?? (data.supporting.craRepAdded === "no" ? "Not added yet. We can’t file until we have access." : "Required so we can see your CRA records.")}
+                </p>
+              </div>
+            </div>
+            <button type="button" onClick={() => setCraOpen(true)} className={buttonClass(data.supporting.craRepAdded ? "soft" : "primary", "sm", "shrink-0")}>
+              {data.supporting.craRepAdded ? "View details" : "Show me how"}
+            </button>
+          </div>
+        ) : null}
+        <CraRepModal
+          open={craOpen}
+          value={data.supporting.craRepAdded}
+          onChange={(v) => update((d) => (d.supporting.craRepAdded = v))}
+          onClose={() => setCraOpen(false)}
         />
         {data.supporting.preparedByAdept === "no" ? (
           <Group title="Previous year’s personal income tax return (T1)" required>

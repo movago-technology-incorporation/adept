@@ -1,4 +1,5 @@
 import "server-only";
+import { reviewUrl } from "@/lib/review";
 import { db } from "./db";
 import { getFirm } from "./data";
 import { adminEmail, sendMail, siteUrl } from "./email";
@@ -128,6 +129,10 @@ export async function notifyTaxReturnSubmitted(r: { id: string; year: number; na
     ],
     link: `${base}/studio/tax-returns/${r.id}`,
   });
+}
+
+export async function notifyTaxReturnCompleted(r: { year: number; name: string; email: string }, base: string) {
+  await send("tax-return-done", r.email, templates.taxReturnCompleted({ name: r.name, year: r.year, portalUrl: `${base}/client`, reviewUrl: reviewUrl() }));
 }
 
 // ── Follow-up pipeline ─────────────────────────────────────────────────

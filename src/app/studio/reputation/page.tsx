@@ -8,10 +8,11 @@ import { DataTable, columnsFor, facetFilter } from "@/components/table/DataTable
 import { Badge, Button, formatDate, statusTone, IconButton } from "@/components/ui/kit";
 import { useApp } from "@/store/app-store";
 import type { Job } from "@/lib/types";
+import { reviewUrl } from "@/lib/review";
 
 type Row = Job & { client: string };
 const h = columnsFor<Row>();
-const reviewUrl = "https://g.page/r/adept-bookkeeping-review";
+const reviewLink = reviewUrl();
 
 export default function ReputationPage() {
   const { clients, jobs, completeJob, remindReview } = useApp();
@@ -130,7 +131,7 @@ export default function ReputationPage() {
           “Thank you for trusting Adept. If we made tax season lighter, a quick Google review helps other Alberta businesses
           find us.”
         </p>
-        <p className="mt-3 text-xs break-all text-muted">{reviewUrl}</p>
+        <p className="mt-3 text-xs break-all text-muted">{reviewLink}</p>
       </Card>
     </div>
   );

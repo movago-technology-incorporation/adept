@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { CheckCircle2, CircleDot, ListTodo, Undo2 } from "lucide-react";
+import { CheckCircle2, CircleDot, ListTodo, MailCheck, Undo2 } from "lucide-react";
 import { setTaxReturnStatus } from "@/app/actions";
 import { cx } from "@/components/ui/kit";
 import type { TaxReturnStatus } from "@/lib/tax-return-server";
@@ -19,11 +19,13 @@ export function TaxReturnStatusControl({ id, status }: { id: string; status: Tax
   const [current, setCurrent] = useState(status);
   const [pending, start] = useTransition();
   const [confirmReopen, setConfirmReopen] = useState(false);
+  const [emailed, setEmailed] = useState(false);
 
   const set = (next: TaxReturnStatus) =>
     start(async () => {
       setCurrent(next);
-      await setTaxReturnStatus(id, next);
+      const res = await setTaxReturnStatus(id, next);
+      setEmailed(res.emailed);
       router.refresh();
     });
 
@@ -45,6 +47,11 @@ export function TaxReturnStatusControl({ id, status }: { id: string; status: Tax
           </button>
         ))}
       </div>
+      {emailed ? (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm text-gold-soft">
+          <MailCheck className="h-4 w-4" /> Client emailed with a review link
+        </span>
+      ) : null}
       {current !== "draft" ? (
         confirmReopen ? (
           <button type="button" onClick={() => set("draft")} className="inline-flex items-center gap-1.5 rounded-full bg-danger px-3.5 py-1.5 text-sm text-white">

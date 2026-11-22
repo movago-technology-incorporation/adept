@@ -25,10 +25,13 @@ export const moreLinks = [
 ];
 
 export const serviceLinks = [
-  { href: "/bookkeeping", label: "Bookkeeping" },
-  { href: "/tax/individual", label: "Individual Tax Returns" },
-  { href: "/tax/sole-proprietor", label: "Sole proprietor returns" },
-  { href: "/tax/corporation", label: "Corporation Tax Returns" },
-  { href: "/tax/planning", label: "Tax Planning" },
-  { href: "/payroll", label: "Payroll" },
+  { href: "/bookkeeping", label: "Small business bookkeeping" },
+  { href: "/services", label: "Clean-up, catch-up & GST/HST" },
+  { href: "/tax", label: "Tax preparation & filing" },
+  { href: "/tax/individual", label: "Personal tax returns (T1)" },
+  { href: "/tax/sole-proprietor", label: "Sole proprietor tax returns" },
+  { href: "/tax/corporation", label: "Corporate tax returns (T2)" },
+  { href: "/tax/planning", label: "Tax planning" },
+  { href: "/tax/filing-request", label: "Start your tax filing online" },
+  { href: "/payroll", label: "Payroll services" },
 ];

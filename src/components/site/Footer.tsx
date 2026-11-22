@@ -59,8 +59,8 @@ export async function Footer() {
             title="Company"
             links={[
               ...nav.filter((n) => !n.children && n.href !== "/bookkeeping" && n.href !== "/payroll"),
-              { href: "/services", label: "Other services" },
-              { href: "/testimonials", label: "Testimonials" },
+              { href: "/book", label: "Book a free consultation" },
+              { href: "/testimonials", label: "Client reviews" },
               { href: "/login", label: "Client portal" },
             ]}
           />

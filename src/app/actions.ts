@@ -17,7 +17,7 @@ import type { EmailRecipient } from "@/lib/email-recipients";
 import { normalizeReturn, validateAll, type TaxReturnData } from "@/lib/tax-return";
 import { currentStatus, filingYears, saveReturn } from "@/lib/tax-return-server";
 import { deleteObject } from "@/lib/storage";
-import { notifyAccountDeleted, notifyBooking, notifyEnquiry, notifyTaxReturnSubmitted, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
+import { notifyAccountDeleted, notifyBooking, notifyEnquiry, notifyTaxReturnCompleted, notifyTaxReturnSubmitted, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
 import type { Appointment, Client, DocumentFile, FollowUp, Job, Lead, Proposal, StaffEmail, Testimonial, ThreadMessage } from "@/lib/types";
 
 // Authorization model
@@ -628,5 +628,16 @@ export async function submitTaxReturn(year: number, raw: TaxReturnData): Promise
 export async function setTaxReturnStatus(id: string, status: "submitted" | "in_progress" | "done" | "draft") {
   await requireStaff();
   if (!["submitted", "in_progress", "done", "draft"].includes(status)) throw new Error("Unknown status");
-  await db()`UPDATE tax_returns SET status = ${status}, updated_at = now() WHERE id = ${id}`;
+  // Only rows whose status actually changes come back, so re-clicking "Done" never emails twice.
+  const [row] = await db()`
+    UPDATE tax_returns t SET status = ${status}, updated_at = now()
+    FROM clients c
+    WHERE t.id = ${id} AND c.id = t.client_id AND t.status IS DISTINCT FROM ${status}
+    RETURNING t.tax_year AS year, c.name, c.email`;
+  if (status === "done" && row?.email) {
+    const site = await siteUrl();
+    after(() => notifyTaxReturnCompleted({ year: Number(row.year), name: String(row.name ?? ""), email: String(row.email) }, site));
+    return { emailed: true };
+  }
+  return { emailed: false };
 }

@@ -137,6 +137,7 @@ export function TaxReturnSummary({
 
       <Section title="Supporting documents" step="supporting" onEdit={onEdit}>
         <Row k="Adept prepared last year’s return" v={yn(data.supporting.preparedByAdept)} />
+        {data.supporting.preparedByAdept === "no" ? <Row k="Added Adept as CRA representative (RepID TJ2D6CP, Level 2)" v={yn(data.supporting.craRepAdded)} /> : null}
         <Docs k="Previous year’s T1" docs={data.supporting.priorT1} />
         <Docs k="Notice of Assessment" docs={data.supporting.noa} />
         <Docs k="Notice of Reassessment" docs={data.supporting.nora} />

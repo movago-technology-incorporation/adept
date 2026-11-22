@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { PageSchema } from "@/components/seo/JsonLd";
 import { pageMeta } from "@/lib/seo";
 import { PageHero } from "@/components/site/PageHero";
@@ -34,7 +35,10 @@ export default async function BookPage() {
         lead="Pick a time on Adept’s calendar. You’ll get a confirmation email with a private video link straight away."
       />
       <Container className="py-16 sm:py-20">
-        <BookingFlow eventTypes={eventTypes} />
+        {/* The calendar reads today's date, so it renders per visit; the rest of the page stays static. */}
+        <Suspense fallback={<div className="h-[560px] animate-pulse rounded-3xl bg-white" />}>
+          <BookingFlow eventTypes={eventTypes} />
+        </Suspense>
       </Container>
     </>
   );

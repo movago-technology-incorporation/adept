@@ -94,17 +94,32 @@ export default async function HomePage() {
 
         <Container className="py-24">
           <div className="max-w-2xl">
-            <p className="rise flex items-center gap-2 text-sm font-medium tracking-wide text-gold-soft">
-              <ShieldCheck className="h-4 w-4" />
-              Bookkeeping & Tax for Canadians · Calgary, AB
-            </p>
-            <h1 className="rise d1 serif mt-6 text-5xl leading-[1.02] font-semibold sm:text-7xl lg:text-8xl">
-              Books kept clean.
-              <span className="block text-gold-soft"> Taxes filed right.</span>
+            <h1>
+              {/* The keyword line is part of the H1 so the heading matches the page title. */}
+              <span className="rise flex items-center gap-2 text-sm font-medium tracking-wide text-gold-soft">
+                <ShieldCheck className="h-4 w-4" />
+                Bookkeeping, Tax & Payroll in Calgary, Alberta
+              </span>
+              <span className="sr-only"> — </span>
+              <span className="rise d1 serif mt-6 block text-5xl leading-[1.02] font-semibold sm:text-7xl lg:text-8xl">
+                Books kept clean.
+                <span className="block text-gold-soft"> Taxes filed right.</span>
+              </span>
             </h1>
             <p className="rise d2 mt-7 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
-              Adept handles bookkeeping, tax returns and payroll for small businesses and individuals across Canada — accurate,
-              on time and CRA-ready.
+              Adept handles{" "}
+              <Link href="/bookkeeping" className="text-white underline decoration-gold/60 underline-offset-4 hover:decoration-gold">
+                bookkeeping
+              </Link>
+              ,{" "}
+              <Link href="/tax" className="text-white underline decoration-gold/60 underline-offset-4 hover:decoration-gold">
+                tax returns
+              </Link>{" "}
+              and{" "}
+              <Link href="/payroll" className="text-white underline decoration-gold/60 underline-offset-4 hover:decoration-gold">
+                payroll
+              </Link>{" "}
+              for small businesses and individuals across Canada — accurate, on time and CRA-ready.
             </p>
             <div className="rise d3 mt-10 flex flex-wrap gap-3">
               <TrackedLink href="/book" cta="Hero · Book a consultation" className={buttonClass("gold", "lg")}>
@@ -182,8 +197,19 @@ export default async function HomePage() {
               Organized, compliant and financially sound — all year.
             </h2>
             <p className="mt-5 text-[17px] leading-relaxed text-muted">
-              We understand the challenges small business owners and individuals face managing their finances. Your records stay
-              accurate, your obligations are met, and your financial health is always in view.
+              We understand the challenges small business owners and individuals face managing their finances. Whether you need{" "}
+              <Link href="/services" className="font-medium text-navy underline decoration-gold underline-offset-4">
+                catch-up bookkeeping
+              </Link>
+              , a{" "}
+              <Link href="/tax/corporation" className="font-medium text-navy underline decoration-gold underline-offset-4">
+                corporate T2 return
+              </Link>{" "}
+              or year-round{" "}
+              <Link href="/tax/planning" className="font-medium text-navy underline decoration-gold underline-offset-4">
+                tax planning
+              </Link>
+              , your records stay accurate, your obligations are met, and your financial health is always in view.
             </p>
             <ul className="mt-8 grid gap-4">
               {[
