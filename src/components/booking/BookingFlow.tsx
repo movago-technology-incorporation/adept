@@ -3,7 +3,6 @@
 import { FormEvent, useRef, useState } from "react";
 import { Scheduler, describePick, type Pick } from "@/components/booking/Scheduler";
 import { Dropdown } from "@/components/ui/Dropdown";
-import { CreateAccountPrompt } from "@/components/auth/CreateAccountPrompt";
 import { Alert, Button, ButtonLink, Input, Label, Surface, Textarea, cx } from "@/components/ui/kit";
 import type { EventType } from "@/lib/cal";
 import type { Appointment } from "@/lib/types";
@@ -90,9 +89,6 @@ export function BookingFlow({ eventTypes }: { eventTypes?: EventType[] }) {
             <ButtonLink href="/" variant="soft">
               Back to home
             </ButtonLink>
-          </div>
-          <div className="mt-10">
-            <CreateAccountPrompt name={done.name} email={done.email} />
           </div>
         </Surface>
       </div>

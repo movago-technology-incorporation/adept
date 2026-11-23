@@ -468,7 +468,7 @@ export async function deleteMyAccount(confirmation: string): Promise<{ ok: true 
   return { ok: true };
 }
 
-const PROPOSAL_STATUSES = ["draft", "sent", "viewed", "accepted", "declined"];
+const PROPOSAL_STATUSES = ["draft", "sent", "viewed", "changes requested", "accepted", "signed", "declined"];
 
 export async function updateProposal(id: string, patch: Partial<Proposal>) {
   await requireStaff();
@@ -479,6 +479,13 @@ export async function updateProposal(id: string, patch: Partial<Proposal>) {
       amount = COALESCE(${patch.amount ? text(patch.amount, 100) : null}, amount),
       status = COALESCE(${patch.status ?? null}, status)
     WHERE id = ${id}`;
+}
+
+/** Removes emails from the Studio email history (the sent messages themselves can't be recalled). */
+export async function deleteStaffEmails(ids: string[]) {
+  await requireStaff();
+  const list = ids.map(String).slice(0, 500);
+  if (list.length) await db()`DELETE FROM staff_emails WHERE id = ANY(${list})`;
 }
 
 export async function deleteProposal(id: string) {

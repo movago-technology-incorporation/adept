@@ -68,6 +68,12 @@ export async function deleteObjectsByPrefix(prefix: string) {
   return removed;
 }
 
+/** Streams a stored file (served through the app's own /api/files route, never a storage URL). */
+export async function getObjectStream(key: string) {
+  const res = await s3.send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key: key }));
+  return { body: res.Body!.transformToWebStream(), contentType: res.ContentType || "application/octet-stream", length: res.ContentLength };
+}
+
 /** Reads a stored file into memory (e.g. to attach it to an email). */
 export async function getObjectBuffer(key: string) {
   const res = await s3.send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key: key }));

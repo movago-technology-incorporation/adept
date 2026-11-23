@@ -15,8 +15,8 @@ export type Viewer =
 /**
  * Who is signing in, resolved once per request.
  * - Staff: Neon Auth users with role "admin" (grant with `npm run auth:make-staff -- <email>`).
- * - Clients: everyone else, matched to a `clients` row by email. A first-time sign-up
- *   gets a new client folder automatically.
+ * - Clients: matched to a `clients` row by email. Staff create that row and send an invite;
+ *   logins without one get no access.
  */
 export const getViewer = cache(async (): Promise<Viewer | null> => {
   await connection(); // per-request: reads session cookies
@@ -47,18 +47,8 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   const existing = await db()`SELECT id FROM clients WHERE lower(email) = lower(${user.email}) LIMIT 1`;
   if (existing[0]) return { role: "client", ...base, clientId: existing[0].id as string };
 
-  const clientId = `cli_${user.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 24)}`;
-  const created = await db()`
-    INSERT INTO clients (id, name, company, email, type, portal_user_id)
-    VALUES (${clientId}, ${name}, '', ${user.email}, 'Individual', ${user.id})
-    ON CONFLICT DO NOTHING
-    RETURNING id`;
-  if (created.length) {
-    // First sign-in after registering: welcome the client and alert the team.
-    const site = await siteUrl();
-    after(() => notifyClientRegistered({ name, email: user.email }, site));
-  }
-  return { role: "client", ...base, clientId };
+  // Registration is invite-only, so a login with no client record on file gets no portal access.
+  return null;
 });
 
 export const homeFor = (viewer: Viewer) => (viewer.role === "staff" ? "/studio" : viewer.role === "pending" ? "/verify" : "/client");

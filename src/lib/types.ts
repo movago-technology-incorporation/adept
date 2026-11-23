@@ -1,5 +1,5 @@
 export type LeadStatus = "new" | "engaged" | "consult booked" | "proposal sent" | "won" | "lost";
-export type ProposalStatus = "draft" | "sent" | "viewed" | "accepted" | "declined";
+export type ProposalStatus = "draft" | "sent" | "viewed" | "changes requested" | "accepted" | "signed" | "declined";
 export type JobStatus = "queued" | "in progress" | "review" | "completed";
 export type ReviewAskStatus = "idle" | "sent" | "reminded" | "left review";
 export type MeetingStatus = "scheduled" | "live" | "completed" | "cancelled";

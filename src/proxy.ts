@@ -16,6 +16,8 @@ export default auth.middleware({
     "/book",
     "/contact",
     "/login",
+    "/register",
+    "/proposal",
     "/portal",
     "/adept-logo.png",
     "/logo-email.png",

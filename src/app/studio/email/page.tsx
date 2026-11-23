@@ -10,6 +10,7 @@ import { AddButton, Modal } from "@/components/studio/Modal";
 import { DataTable, columnsFor, facetFilter } from "@/components/table/DataTable";
 import { Badge, IconButton } from "@/components/ui/kit";
 import { useApp } from "@/store/app-store";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import type { EmailRecipient } from "@/lib/email-recipients";
 import type { StaffEmail } from "@/lib/types";
 
@@ -18,7 +19,7 @@ const when = (s: string) =>
   new Date(s.replace(" ", "T")).toLocaleString("en-CA", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
 export default function StudioEmailPage() {
-  const { staffEmails } = useApp();
+  const { staffEmails, deleteStaffEmails } = useApp();
   const router = useRouter();
   const [viewing, setViewing] = useState<StaffEmail | null>(null);
 
@@ -83,6 +84,7 @@ export default function StudioEmailPage() {
               >
                 {row.original.status === "failed" ? <RotateCw className="h-4 w-4" /> : <Forward className="h-4 w-4" />}
               </IconButton>
+              <ConfirmButton label="Delete" confirmLabel="Delete" onConfirm={() => deleteStaffEmails([row.original.id])} />
             </span>
           ),
         }),
@@ -119,6 +121,18 @@ export default function StudioEmailPage() {
         initialSorting={[{ id: "createdAt", desc: true }]}
         onRowClick={(e) => setViewing(e)}
         exportFileName="emails"
+        bulkActions={(selected, clear) => (
+          <ConfirmButton
+            tone="light"
+            size="sm"
+            label="Delete"
+            confirmLabel={`Delete ${selected.length}`}
+            onConfirm={() => {
+              deleteStaffEmails(selected.map((e) => e.id));
+              clear();
+            }}
+          />
+        )}
         emptyTitle="No emails sent yet"
         emptyBody="Write your first email to a client or lead."
         emptyAction={<AddButton onClick={() => router.push(composeHref())}>New email</AddButton>}

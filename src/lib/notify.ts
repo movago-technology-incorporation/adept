@@ -25,9 +25,18 @@ async function send(
   return sendMail({ kind, to, subject: t.subject, html, text, replyTo: opts?.replyTo, attachments: opts?.attachments }, { throwOnError: opts?.throwOnError });
 }
 
-async function alertAdmin(t: Parameters<typeof templates.adminAlert>[0], replyTo?: string) {
-  const to = adminEmail();
-  if (to) await send("admin-alert", to, templates.adminAlert(t), { replyTo });
+/** Team inboxes: tax work → TAX_RELATED_EMAIL, meetings → ALL_MEETINGS_EMAIL, everything else → ADMIN_EMAIL. */
+type Inbox = "general" | "tax" | "meetings";
+function inboxFor(inbox: Inbox) {
+  const env = process.env;
+  if (inbox === "tax") return env.TAX_RELATED_EMAIL?.trim() || adminEmail();
+  if (inbox === "meetings") return (env.ALL_MEETINGS_EMAIL || env.ALL_MEETINGS_EMAIl)?.trim() || adminEmail();
+  return adminEmail();
+}
+
+async function alertAdmin(t: Parameters<typeof templates.adminAlert>[0], replyTo?: string, inbox: Inbox = "general", attachments?: Mail["attachments"]) {
+  const to = inboxFor(inbox);
+  if (to) await send("admin-alert", to, templates.adminAlert(t), { replyTo, attachments });
 }
 
 // ── Events ─────────────────────────────────────────────────────────────
@@ -57,6 +66,7 @@ export async function notifyEnquiry(
     kind === "filing" ? "filing-request" : "contact",
     lead.email,
     templates.enquiryReceived({ name: lead.name, interest: lead.interest, message: lead.notes, kind }),
+    { replyTo: inboxFor(kind === "filing" ? "tax" : "general") },
   );
   await alertAdmin(
     {
@@ -73,6 +83,7 @@ export async function notifyEnquiry(
       link: `${base}/studio/leads/${lead.id}`,
     },
     lead.email,
+    kind === "filing" ? "tax" : "general",
   );
 }
 
@@ -94,6 +105,7 @@ export async function notifyBooking(
     "booking",
     b.email,
     templates.bookingConfirmed({ name: b.name, topic: b.topic, when: fmt(b.timeZone), duration: b.duration, meetingUrl: b.meetingUrl }),
+    { replyTo: inboxFor("meetings") },
   );
   await alertAdmin(
     {
@@ -107,6 +119,7 @@ export async function notifyBooking(
       link: `${base}/studio/meetings/${b.id}`,
     },
     b.email,
+    "meetings",
   );
 }
 
@@ -124,7 +137,7 @@ export async function notifyAccountDeleted(client: { name: string; email: string
 }
 
 export async function notifyTaxReturnSubmitted(r: { id: string; year: number; name: string; email: string; clientId: string }, base: string) {
-  await send("tax-return", r.email, templates.taxReturnReceived({ name: r.name, year: r.year, portalUrl: `${base}/client/tax-return` }));
+  await send("tax-return", r.email, templates.taxReturnReceived({ name: r.name, year: r.year, portalUrl: `${base}/client/tax-return` }), { replyTo: inboxFor("tax") });
   await alertAdmin({
     title: `New ${r.year} tax return submitted`,
     summary: `${r.name} submitted their ${r.year} personal tax questionnaire.`,
@@ -134,7 +147,7 @@ export async function notifyTaxReturnSubmitted(r: { id: string; year: number; na
       ["Tax year", String(r.year)],
     ],
     link: `${base}/studio/tax-returns/${r.id}`,
-  });
+  }, r.email, "tax");
 }
 
 export async function notifyTaxReturnCompleted(
@@ -146,7 +159,7 @@ export async function notifyTaxReturnCompleted(
     "tax-return-done",
     r.email,
     templates.taxReturnCompleted({ name: r.name, year: r.year, portalUrl: `${base}/client/documents`, reviewUrl: reviewUrl(), attached: !!r.pdf }),
-    { attachments, throwOnError: true },
+    { attachments, throwOnError: true, replyTo: inboxFor("tax") },
   );
 }
 
@@ -202,6 +215,52 @@ export async function processDueFollowUps(limit = 25) {
   const results = [];
   for (const row of rows) results.push({ id: row.id, ...(await deliver(row)) });
   return { processed: results.length, sent: results.filter((r) => r.ok).length, results };
+}
+
+// ── Proposals ──────────────────────────────────────────────────────────
+
+export async function sendProposalEmail(p: { to: string; name: string; url: string; packageName: string; fee: string; preparedBy: string }) {
+  return send("proposal", p.to, templates.proposalReady(p));
+}
+
+export async function notifyProposalDecision(p: { id: string; name: string; email: string; business: string; decision: "changes" | "declined"; note: string }, base: string) {
+  await alertAdmin(
+    {
+      title: p.decision === "changes" ? "Proposal: changes requested" : "Proposal declined",
+      summary: `${p.name}${p.business ? ` (${p.business})` : ""} ${p.decision === "changes" ? "asked for changes to their proposal." : "decided not to proceed."}`,
+      rows: [
+        ["Client", p.name],
+        ["Email", p.email],
+      ],
+      message: p.note,
+      link: `${base}/studio/proposals/${p.id}`,
+    },
+    p.email,
+  );
+}
+
+export async function notifyProposalSigned(
+  p: { id: string; name: string; email: string; business: string; packageName: string; fee: string; pdf: { filename: string; content: Buffer } },
+  base: string,
+) {
+  const attachments = [{ ...p.pdf, contentType: "application/pdf" }];
+  await send("proposal-signed", p.email, templates.proposalSigned({ name: p.name, business: p.business || p.name }), { attachments });
+  await alertAdmin(
+    {
+      title: "Engagement letter signed",
+      summary: `${p.name}${p.business ? ` (${p.business})` : ""} accepted the ${p.packageName} proposal and signed the engagement letter. Their portal invite and onboarding checklist have been sent.`,
+      rows: [
+        ["Client", p.name],
+        ["Email", p.email],
+        ["Package", p.packageName],
+        ["Monthly fee", p.fee],
+      ],
+      link: `${base}/studio/proposals/${p.id}`,
+    },
+    p.email,
+    "general",
+    attachments,
+  );
 }
 
 export { siteUrl };

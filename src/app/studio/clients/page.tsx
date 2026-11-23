@@ -1,7 +1,7 @@
 "use client";
 import { composeHref } from "@/lib/email-recipients";
 
-import { Pencil, Mail } from "lucide-react";
+import { Pencil, Mail, FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -10,7 +10,7 @@ import { ClientModal } from "@/components/studio/ClientModal";
 import { AddButton } from "@/components/studio/Modal";
 import { DataTable, columnsFor, facetFilter } from "@/components/table/DataTable";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
-import {Badge, formatDate, IconButton } from "@/components/ui/kit";
+import { Badge, buttonClass, formatDate, IconButton } from "@/components/ui/kit";
 import { useApp } from "@/store/app-store";
 import type { Client } from "@/lib/types";
 
@@ -104,7 +104,14 @@ export default function ClientsPage() {
         eyebrow="Delivery"
         title="Clients"
         description="Every client folder. New portal sign-ups appear here automatically."
-        actions={<AddButton onClick={() => setModal({})}>Add client</AddButton>}
+        actions={
+          <>
+            <a href="/api/export/clients" download className={buttonClass("soft", "sm")}>
+              <FileSpreadsheet className="h-4 w-4" /> Export to Excel
+            </a>
+            <AddButton onClick={() => setModal({})}>Add client</AddButton>
+          </>
+        }
       />
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="Clients" value={clients.length} />

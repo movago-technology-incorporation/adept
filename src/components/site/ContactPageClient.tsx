@@ -6,14 +6,12 @@ import { ClockIcon, MailIcon, PhoneIcon } from "@/components/site/Icons";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Alert, Button, ButtonLink, Container, Input, Label, Surface, Textarea } from "@/components/ui/kit";
 import { useApp } from "@/store/app-store";
-import { CreateAccountPrompt } from "@/components/auth/CreateAccountPrompt";
 
 export function ContactPageClient() {
   const { firm, addLead, recordClick, syncError } = useApp();
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState<{ name: string; email: string } | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,7 +47,6 @@ export function ContactPageClient() {
         .join("\n"),
       createdAt: new Date().toISOString().slice(0, 10),
     });
-    setSubmitted({ name: String(data.get("name")), email: String(data.get("email")) });
     void recordClick("/contact", "Send message");
     setSaving(false);
     setDone(true);
@@ -101,11 +98,6 @@ export function ContactPageClient() {
               <p className="mx-auto mt-3 max-w-md text-muted">
                 {syncError ?? "Thanks for reaching out. We’ll be in touch within one business day."}
               </p>
-              {!syncError ? (
-                <div className="mt-10">
-                  <CreateAccountPrompt name={submitted?.name} email={submitted?.email} />
-                </div>
-              ) : null}
               {syncError ? (
                 <Button className="mt-6" onClick={() => setDone(false)}>
                   Try again

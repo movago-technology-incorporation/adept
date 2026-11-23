@@ -2,7 +2,8 @@
 import { Mail } from "lucide-react";
 import { composeHref } from "@/lib/email-recipients";
 
-import { Pencil } from "lucide-react";
+import { Pencil, UserPlus } from "lucide-react";
+import { InviteModal } from "@/components/studio/InviteModal";
 import { use, useState } from "react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
@@ -22,7 +23,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const router = useRouter();
   const lead = leads.find((row) => row.id === id);
   const [note, setNote] = useState("");
-  const [modal, setModal] = useState<null | "meeting" | "proposal" | "follow" | "edit">(null);
+  const [modal, setModal] = useState<null | "meeting" | "proposal" | "follow" | "edit" | "invite">(null);
   if (!lead) notFound();
 
   const meetings = appointments.filter((a) => a.leadId === lead.id);
@@ -55,7 +56,11 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               <Mail className="h-4 w-4" />
               Email
             </AddButton>
-            <AddButton onClick={() => setModal("meeting")}>Schedule meeting</AddButton>
+            <AddButton onClick={() => setModal("invite")}>
+              <UserPlus className="h-4 w-4" />
+              Invite to portal
+            </AddButton>
+            <AddButton variant="soft" onClick={() => setModal("meeting")}>Schedule meeting</AddButton>
             <AddButton variant="soft" onClick={() => setModal("proposal")}>
               Proposal
             </AddButton>
@@ -178,6 +183,17 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       <ProposalModal open={modal === "proposal"} onClose={() => setModal(null)} leadId={lead.id} />
       <FollowUpModal open={modal === "follow"} onClose={() => setModal(null)} leadId={lead.id} />
       <LeadModal open={modal === "edit"} onClose={() => setModal(null)} item={lead} />
+      <InviteModal
+        open={modal === "invite"}
+        onClose={() => {
+          setModal(null);
+          router.refresh();
+        }}
+        name={lead.name}
+        email={lead.email}
+        leadId={lead.id}
+        defaultType={lead.company ? "Corporation" : "Individual"}
+      />
     </div>
   );
 }

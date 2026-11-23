@@ -159,9 +159,9 @@ export function Badge({
 
 /** Status → badge tone, shared by Studio and the client portal. */
 export function statusTone(status: string): "neutral" | "gold" | "success" | "danger" | "warn" | "navy" {
-  if (["completed", "accepted", "won", "sent", "left review", "ready"].includes(status)) return "success";
+  if (["completed", "accepted", "signed", "won", "sent", "left review", "ready"].includes(status)) return "success";
   if (["lost", "declined", "cancelled"].includes(status)) return "danger";
-  if (["outstanding", "queued", "draft", "reminded", "review"].includes(status)) return "warn";
+  if (["outstanding", "queued", "draft", "reminded", "review", "changes requested"].includes(status)) return "warn";
   if (["consult booked", "proposal sent", "scheduled", "in progress", "engaged", "viewed", "live"].includes(status)) return "gold";
   return "neutral";
 }

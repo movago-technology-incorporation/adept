@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, FolderOpen } from "lucide-react";
@@ -9,7 +10,15 @@ import { getReturnById } from "@/lib/tax-return-server";
 
 export const metadata = { title: "Tax return" };
 
-export default async function StudioTaxReturnPage({ params }: { params: Promise<{ id: string }> }) {
+export default function StudioTaxReturnPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<div className="h-[70vh] animate-pulse rounded-3xl bg-white" aria-busy="true" />}>
+      <StudioTaxReturnPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function StudioTaxReturnPageContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await requirePageRole("staff");
   const r = await getReturnById(id);

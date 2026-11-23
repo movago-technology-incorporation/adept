@@ -1,21 +1,19 @@
 import { NextResponse } from "next/server";
-import { uploadObject, listObjects, getObjectSignedUrl } from "@/lib/storage";
+import { uploadObject, listObjects } from "@/lib/storage";
 import { getViewer } from "@/lib/auth/viewer";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const deny = (status: number, error: string) => NextResponse.json({ success: false, error }, { status });
 
-/** GET ?key= → short-lived download link (owner or staff). GET without key → listing (staff). */
+/** GET ?key= → redirects to /api/files (owner or staff). GET without key → listing (staff). */
 export async function GET(request: Request) {
   const viewer = await getViewer();
   if (!viewer) return deny(401, "Please sign in");
   if (viewer.role === "pending") return deny(403, "Please confirm your email first");
   try {
     const key = new URL(request.url).searchParams.get("key");
-    if (key) {
-      if (viewer.role === "client" && !key.startsWith(`clients/${viewer.clientId}/`)) return deny(403, "Not your file");
-      return NextResponse.json({ success: true, url: await getObjectSignedUrl(key, 300), key });
-    }
+    // Files are served through /api/files on our own domain; no storage links are handed out.
+    if (key) return NextResponse.redirect(new URL(`/api/files/${key.split("/").map(encodeURIComponent).join("/")}`, request.url));
     if (viewer.role !== "staff") return deny(403, "Staff only");
     const items = await listObjects();
     return NextResponse.json({

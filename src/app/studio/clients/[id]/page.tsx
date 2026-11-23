@@ -16,6 +16,10 @@ import { MeetingModal } from "@/components/studio/MeetingModal";
 import { ProposalModal } from "@/components/studio/ProposalModal";
 import { Button, EmptyState, Input, formatDate, formatWhen, IconButton } from "@/components/ui/kit";
 import { useApp } from "@/store/app-store";
+import { PortalAccess } from "@/components/studio/PortalAccess";
+import { Checklist } from "@/components/portal/Checklist";
+import { Uploader } from "@/components/portal/Uploader";
+import { BUSINESS_DOC_CATEGORIES, PERSONAL_DOC_CATEGORIES, isBusiness } from "@/lib/client-kind";
 
 export default function ClientFolderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -24,7 +28,11 @@ export default function ClientFolderPage({ params }: { params: Promise<{ id: str
   const [reply, setReply] = useState("");
   const client = clients.find((row) => row.id === id);
   const [modal, setModal] = useState<null | "job" | "meeting" | "proposal" | "edit">(null);
+  const [uploadCategory, setUploadCategory] = useState("");
   if (!client) notFound();
+  const business = isBusiness(client.type);
+  const categories = business ? BUSINESS_DOC_CATEGORIES : PERSONAL_DOC_CATEGORIES;
+  const category = uploadCategory || categories[0];
 
   const files = documents.filter((d) => d.clientId === client.id);
   const clientJobs = jobs.filter((j) => j.clientId === client.id);
@@ -75,6 +83,35 @@ export default function ClientFolderPage({ params }: { params: Promise<{ id: str
           </>
         }
       />
+
+      <Card title="Client portal">
+        <PortalAccess client={client} />
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card title="Monthly checklist" description={business ? "What this business sends Adept each month" : "Recurring items for this client"}>
+          <Checklist clientId={client.id} manage />
+        </Card>
+        <Card title="Upload to their folder" description="Files appear in the client’s portal straight away">
+          <label className="mb-3 grid gap-1.5 text-sm font-medium text-navy">
+            Category
+            <select
+              value={category}
+              onChange={(e) => setUploadCategory(e.target.value)}
+              className="h-11 cursor-pointer rounded-xl bg-sand px-3 text-sm text-navy outline-none focus:bg-sand-2"
+            >
+              {[...categories, "Reports from Adept", "Tax documents from Adept"].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <Uploader
+            forClientId={client.id}
+            category={category}
+            kind={category === "Reports from Adept" ? "report" : category === "Tax documents from Adept" ? "tax" : "upload"}
+          />
+        </Card>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Jobs">

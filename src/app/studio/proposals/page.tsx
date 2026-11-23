@@ -2,6 +2,7 @@
 
 import { Pencil } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PageHeader, Stat } from "@/components/portal/Shell";
 import { AddButton } from "@/components/studio/Modal";
@@ -15,11 +16,12 @@ import type { Proposal, ProposalStatus } from "@/lib/types";
 
 type Row = Proposal & { who: string; whoHref: string; kind: "Lead" | "Client" };
 const h = columnsFor<Row>();
-const STATUSES: ProposalStatus[] = ["draft", "sent", "viewed", "accepted", "declined"];
+const STATUSES: ProposalStatus[] = ["draft", "sent", "viewed", "changes requested", "accepted", "signed", "declined"];
 
 export default function ProposalsPage() {
   const { proposals, leads, clients, updateLead, updateProposal, deleteProposal } = useApp();
   const [modal, setModal] = useState<{ item?: Proposal } | null>(null);
+  const router = useRouter();
 
   const rows = useMemo<Row[]>(
     () =>
@@ -90,32 +92,32 @@ export default function ProposalsPage() {
         meta: { className: "w-px whitespace-nowrap", align: "end" },
         cell: ({ row }) => (
           <span className="flex justify-end gap-1">
-            <IconButton label="Edit" onClick={() => setModal({ item: row.original })}>
-<Pencil className="h-4 w-4" />
-</IconButton>
+            <IconButton label="Open proposal" onClick={() => router.push(`/studio/proposals/${row.original.id}`)}>
+              <Pencil className="h-4 w-4" />
+            </IconButton>
             <ConfirmButton onConfirm={() => deleteProposal(row.original.id)} confirmLabel="Delete" label="Delete" />
           </span>
         ),
       }),
     ]);
-  }, [updateProposal, updateLead, deleteProposal]);
+  }, [updateProposal, updateLead, deleteProposal, router]);
 
   const count = (...s: ProposalStatus[]) => proposals.filter((p) => s.includes(p.status)).length;
-  const decided = count("accepted", "declined");
+  const decided = count("accepted", "signed", "declined");
 
   return (
     <>
       <PageHeader
         eyebrow="Delivery"
         title="Proposals"
-        description="Draft, send and close engagement proposals."
+        description="Build, send and e-sign bookkeeping proposals and engagement letters."
         actions={<AddButton onClick={() => setModal({})}>New proposal</AddButton>}
       />
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="Drafts" value={count("draft")} />
-        <Stat label="Awaiting answer" value={count("sent", "viewed")} />
-        <Stat label="Accepted" value={count("accepted")} />
-        <Stat label="Acceptance rate" value={decided ? `${Math.round((count("accepted") / decided) * 100)}%` : "—"} />
+        <Stat label="Awaiting answer" value={count("sent", "viewed", "changes requested")} />
+        <Stat label="Signed" value={count("accepted", "signed")} />
+        <Stat label="Acceptance rate" value={decided ? `${Math.round((count("accepted", "signed") / decided) * 100)}%` : "—"} />
       </div>
       <DataTable
         data={rows}
@@ -127,7 +129,7 @@ export default function ProposalsPage() {
           { column: "kind", label: "Type" },
         ]}
         initialSorting={[{ id: "sentAt", desc: true }]}
-        onRowClick={(r) => setModal({ item: r })}
+        onRowClick={(r) => router.push(`/studio/proposals/${r.id}`)}
         exportFileName="proposals"
         emptyTitle="No proposals yet"
         emptyAction={<AddButton onClick={() => setModal({})}>New proposal</AddButton>}

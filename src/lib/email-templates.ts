@@ -339,6 +339,69 @@ export const templates = {
     },
   }),
 
+  proposalReady: (p: { name: string; url: string; packageName: string; fee: string; preparedBy: string }) => ({
+    subject: "Your bookkeeping proposal from Adept",
+    content: {
+      preheader: `Your ${p.packageName} bookkeeping proposal is ready to review.`,
+      eyebrow: "Your proposal",
+      title: "Your bookkeeping proposal is ready",
+      greeting: `Hi ${first(p.name)},`,
+      intro: `Thank you for our conversation. I’ve put together a bookkeeping proposal based on what we discussed, along with the engagement letter.`,
+      blocks: [
+        { type: "details" as const, rows: [["Recommended package", esc(p.packageName)], ["Monthly fee", `${esc(p.fee)} + applicable taxes`]] as [string, string][] },
+        {
+          type: "steps" as const,
+          items: ["Review the proposal.", "Accept it, or ask for changes.", "Sign the engagement letter online, and we’ll send your portal invitation."],
+        },
+        { type: "text" as const, html: `Questions? Just reply to this email.<br/>${esc(p.preparedBy)}` },
+      ],
+      cta: { label: "Review your proposal", href: p.url },
+    },
+  }),
+
+  proposalSigned: (p: { name: string; business: string }) => ({
+    subject: "Welcome to Adept: your signed engagement letter",
+    content: {
+      preheader: "Thank you for signing. Your proposal and engagement letter are attached.",
+      eyebrow: "You’re all set",
+      title: "Welcome to Adept",
+      greeting: `Hi ${first(p.name)},`,
+      intro: `Thank you for choosing Adept for ${p.business}. A copy of your signed proposal and engagement letter is attached for your records.`,
+      blocks: [
+        {
+          type: "steps" as const,
+          items: [
+            "Watch for a separate email inviting you to your secure client portal.",
+            "Complete the agreed initial payment/retainer.",
+            "Connect QuickBooks Online and grant Adept accountant access.",
+            "Upload your opening documents in the portal. Your onboarding checklist is waiting there.",
+          ],
+        },
+      ],
+    },
+  }),
+
+  portalInvite: (p: { name: string; url: string; expires: string; business: boolean }) => ({
+    subject: "Your invitation to the Adept client portal",
+    content: {
+      preheader: `Set up your secure Adept portal account. This link works until ${p.expires}.`,
+      eyebrow: "You’re invited",
+      title: "Set up your client portal",
+      greeting: `Hi ${first(p.name)},`,
+      intro: p.business
+        ? "We’ve set up a secure workspace for your business. Create your login to upload bank statements, receipts and records, work through your monthly checklist and message our team."
+        : "We’ve set up a secure client portal for you. Create your login to upload your documents, track what’s outstanding and message our team.",
+      blocks: [
+        {
+          type: "steps" as const,
+          items: ["Click the button below.", "Choose a password (your email is already filled in).", "You’re in. Start uploading or check your checklist."],
+        },
+        { type: "text" as const, html: `This link is just for you and works until <strong>${esc(p.expires)}</strong>. If it expires, reply to this email and we’ll send a new one.` },
+      ],
+      cta: { label: "Create my account", href: p.url },
+    },
+  }),
+
   verifyAccount: (p: { name: string; code: string; minutes: number }) => ({
     subject: `${p.code} is your Adept verification code`,
     content: {

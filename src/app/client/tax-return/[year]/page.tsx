@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Clock3, MessagesSquare } from "lucide-react";
@@ -17,7 +18,15 @@ const STAGES = [
   { key: "done", label: "Completed" },
 ];
 
-export default async function TaxReturnYearPage({ params }: { params: Promise<{ year: string }> }) {
+export default function TaxReturnYearPage({ params }: { params: Promise<{ year: string }> }) {
+  return (
+    <Suspense fallback={<div className="h-[70vh] animate-pulse rounded-3xl bg-white" aria-busy="true" />}>
+      <TaxReturnYearPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function TaxReturnYearPageContent({ params }: { params: Promise<{ year: string }> }) {
   // Auth first: it reads the session (request-time), so the current-date check below runs per request.
   const viewer = await requirePageRole("client");
   const { year: raw } = await params;

@@ -8,6 +8,8 @@ import {
   House,
   Inbox,
   Landmark,
+  ListChecks,
+  FileSignature,
   Mail,
   MessagesSquare,
   MousePointerClick,
@@ -37,4 +39,6 @@ export const iconMap = {
   folder: FolderOpen,
   mail: Mail,
   taxReturn: ClipboardCheck,
+  checklist: ListChecks,
+  agreement: FileSignature,
 };

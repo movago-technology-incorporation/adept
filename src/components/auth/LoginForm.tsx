@@ -3,9 +3,9 @@
 import { FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth/client";
-import { Alert, Button, Input, Label, cx } from "@/components/ui/kit";
+import { Alert, Button, Input, Label } from "@/components/ui/kit";
 
-type Mode = "signin" | "signup" | "forgot" | "reset";
+type Mode = "signin" | "forgot" | "reset";
 
 function friendly(message?: string | null) {
   const m = (message || "").toLowerCase();
@@ -19,11 +19,10 @@ function friendly(message?: string | null) {
 }
 
 export function LoginForm() {
-  // Pre-fill from links like /login?mode=signup&email=…&name=… (e.g. after booking or contacting us).
+  // Accounts are created from Adept’s invite links (/register/…), so this form only signs in.
   const params = useSearchParams();
-  const [mode, setMode] = useState<Mode>(params.get("mode") === "signup" ? "signup" : "signin");
+  const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState(params.get("email") ?? "");
-  const prefillName = params.get("name") ?? "";
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -61,13 +60,7 @@ export function LoginForm() {
         if (res.error) throw new Error(res.error.message);
         enterPortal();
       });
-    } else if (mode === "signup") {
-      await run(async () => {
-        if (password.length < 8) throw new Error("Password must be at least 8 characters");
-        const res = await authClient.signUp.email({ email, password, name: String(data.get("name") || "").trim() });
-        if (res.error) throw new Error(res.error.message);
-        enterPortal();
-      });
+
     } else if (mode === "forgot") {
       await run(async () => {
         const res = await authClient.emailOtp.sendVerificationOtp({ email, type: "forget-password" });
@@ -93,40 +86,16 @@ export function LoginForm() {
 
   const titles: Record<Mode, [string, string]> = {
     signin: ["Welcome back", "Sign in to your Adept workspace."],
-    signup: ["Create your account", "Set up secure access to your client portal."],
     forgot: ["Reset your password", "We’ll email you a one-time code."],
     reset: ["Choose a new password", "Enter the code from your email."],
   };
 
   return (
     <div>
-      {mode === "signin" || mode === "signup" ? (
-        <div className="mb-8 grid grid-cols-2 gap-1 rounded-full bg-sand p-1 text-sm" role="tablist">
-          {(["signin", "signup"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="tab"
-              aria-selected={mode === m}
-              onClick={() => switchTo(m)}
-              className={cx("rounded-full py-2.5 font-medium transition-colors", mode === m ? "bg-navy text-white" : "text-navy hover:bg-sand-2")}
-            >
-              {m === "signin" ? "Sign in" : "Create account"}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
       <h1 className="serif text-4xl font-semibold text-navy">{titles[mode][0]}</h1>
       <p className="mt-2 text-muted">{titles[mode][1]}</p>
 
       <form onSubmit={onSubmit} className="mt-8 grid gap-4" noValidate={false}>
-        {mode === "signup" ? (
-          <Label label="Full name">
-            <Input name="name" required autoComplete="name" defaultValue={prefillName} />
-          </Label>
-        ) : null}
-
         <Label label="Email">
           <Input
             name="email"
@@ -148,7 +117,7 @@ export function LoginForm() {
         {mode !== "forgot" ? (
           <Label
             label={mode === "reset" ? "New password" : "Password"}
-            hint={mode === "signup" || mode === "reset" ? "At least 8 characters." : undefined}
+            hint={mode === "reset" ? "At least 8 characters." : undefined}
           >
             <Input
               name="password"
@@ -170,7 +139,7 @@ export function LoginForm() {
         {error ? <Alert>{error}</Alert> : null}
 
         <Button type="submit" size="lg" loading={loading} className="mt-2">
-          {mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send code" : "Update password"}
+          {mode === "signin" ? "Sign in"  : mode === "forgot" ? "Send code" : "Update password"}
         </Button>
 
         {mode === "forgot" || mode === "reset" ? (
@@ -180,9 +149,13 @@ export function LoginForm() {
         ) : null}
       </form>
 
-      {mode === "signup" ? (
+      {mode === "signin" ? (
         <p className="mt-6 text-xs leading-relaxed text-muted">
-          Already a client? Use the email address Adept has on file and your existing documents will be waiting for you.
+          New to Adept? Portal accounts are set up by invitation. Check your email for an invite link, or{" "}
+          <a href="/contact" className="font-medium text-navy underline underline-offset-4">
+            contact us
+          </a>
+          .
         </p>
       ) : null}
     </div>

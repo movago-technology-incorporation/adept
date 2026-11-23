@@ -7,8 +7,10 @@ import { useApp } from "@/store/app-store";
 
 type Item = { name: string; state: "uploading" | "done" | "error"; message?: string };
 
-export function Uploader({ kind, category }: { kind: DocumentFile["kind"]; category: string }) {
-  const { addDocument, clientId } = useApp();
+/** Uploads to the signed-in client's folder, or (staff) to the folder of `forClientId`. */
+export function Uploader({ kind, category, forClientId }: { kind: DocumentFile["kind"]; category: string; forClientId?: string }) {
+  const { addDocument, clientId: ownClientId } = useApp();
+  const clientId = forClientId ?? ownClientId;
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
@@ -24,6 +26,7 @@ export function Uploader({ kind, category }: { kind: DocumentFile["kind"]; categ
         const body = new FormData();
         body.append("file", file);
         body.append("category", category);
+        if (forClientId) body.append("clientId", forClientId);
         const res = await fetch("/api/storage", { method: "POST", body });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "Upload failed");
@@ -101,10 +104,10 @@ export function Uploader({ kind, category }: { kind: DocumentFile["kind"]; categ
   );
 }
 
-/** Opens a short-lived signed link for a stored file. */
-export async function openStoredFile(key: string) {
-  const res = await fetch(`/api/storage?key=${encodeURIComponent(key)}`);
-  const data = await res.json().catch(() => ({}));
-  if (res.ok && data.url) window.open(data.url, "_blank", "noopener");
-  else alert(data.error || "This file isn’t available right now.");
+/** Link to a stored file on Adept's own domain (login-checked by /api/files). */
+export const fileUrl = (key: string) => `/api/files/${key.split("/").map(encodeURIComponent).join("/")}`;
+
+/** Opens a stored file in a new tab. */
+export function openStoredFile(key: string) {
+  window.open(fileUrl(key), "_blank", "noopener");
 }

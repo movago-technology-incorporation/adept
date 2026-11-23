@@ -228,3 +228,45 @@ CREATE TABLE IF NOT EXISTS tax_returns (
 -- When the "return done" email was sent (sent once, even if staff reopen and re-complete).
 ALTER TABLE tax_returns ADD COLUMN IF NOT EXISTS completed_emailed_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS tax_returns_status_idx ON tax_returns (status, submitted_at DESC);
+-- Invite-only portal registration: Adept sends a dedicated link that expires when the admin chooses.
+CREATE TABLE IF NOT EXISTS portal_invites (
+  id         TEXT PRIMARY KEY,
+  client_id  TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  email      TEXT NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at    TIMESTAMPTZ,
+  revoked_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS portal_invites_client_idx ON portal_invites (client_id, created_at DESC);
+
+-- Monthly checklist Adept sets up per client (e.g. "Upload bank statements"), ticked off month by month.
+CREATE TABLE IF NOT EXISTS checklist_items (
+  id         TEXT PRIMARY KEY,
+  client_id  TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  title      TEXT NOT NULL,
+  position   INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS checklist_items_client_idx ON checklist_items (client_id, position);
+
+CREATE TABLE IF NOT EXISTS checklist_marks (
+  item_id TEXT NOT NULL REFERENCES checklist_items(id) ON DELETE CASCADE,
+  month   TEXT NOT NULL,              -- YYYY-MM
+  done_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  done_by TEXT NOT NULL DEFAULT 'client', -- client | adept
+  PRIMARY KEY (item_id, month)
+);
+-- Proposals become real documents: fill-in details, a private client link, decision and e-signature.
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS details JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS token_hash TEXT;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS viewed_at TIMESTAMPTZ;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS decision_note TEXT;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS decided_at TIMESTAMPTZ;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signed_name TEXT;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signed_at TIMESTAMPTZ;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signed_ip TEXT;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signed_agent TEXT;
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS document_key TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS proposals_token_idx ON proposals (token_hash) WHERE token_hash IS NOT NULL;

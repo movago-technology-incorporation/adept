@@ -10,8 +10,10 @@ import { AddButton } from "@/components/studio/Modal";
 import { todayIso } from "@/components/ui/Dropdown";
 import { EmptyState, formatDate, formatWhen } from "@/components/ui/kit";
 import { useClientWorkspace } from "@/store/app-store";
+import { Checklist } from "@/components/portal/Checklist";
+import { isBusiness, usesPersonalReturn } from "@/lib/client-kind";
 
-export default function ClientHome() {
+export function ClientHome() {
   const { client, clientDocuments, outstanding, clientAppointments, messages } = useClientWorkspace();
   const [modal, setModal] = useState<null | "meeting" | "message" | "upload" | "receipt">(null);
   const close = () => setModal(null);
@@ -21,6 +23,7 @@ export default function ClientHome() {
     .sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
   const next = upcoming[0];
   const firstName = client?.name.split(" ")[0] ?? "there";
+  const business = isBusiness(client?.type);
 
   return (
     <div className="grid gap-6">
@@ -48,17 +51,25 @@ export default function ClientHome() {
         <Stat label="Next meeting" value={next ? formatDate(next.date).replace(/, \d{4}$/, "") : "—"} hint={next ? next.time : undefined} />
       </div>
 
+      {business ? (
+        <Card title="Monthly checklist" description="What Adept needs from you this month" action={<Link href="/client/checklist" className="text-sm font-medium text-navy hover:text-gold-deep">Open checklist →</Link>}>
+          <Checklist />
+        </Card>
+      ) : null}
+
+      {usesPersonalReturn(client?.type) ? (
       <Link
-        href="/client/tax-return"
-        className="group flex flex-col gap-4 rounded-3xl bg-gold p-6 text-navy transition-colors hover:bg-gold-soft sm:flex-row sm:items-center sm:justify-between sm:p-8"
-      >
-        <div>
-          <p className="eyebrow text-navy/70">Personal tax return</p>
-          <p className="serif mt-2 text-3xl font-semibold">Complete your tax questionnaire</p>
-          <p className="mt-1 text-navy/75">Answer a few questions and upload your slips — your progress saves automatically.</p>
-        </div>
-        <span className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-navy px-5 font-medium text-white">Open tax return →</span>
-      </Link>
+          href="/client/tax-return"
+          className="group flex flex-col gap-4 rounded-3xl bg-gold p-6 text-navy transition-colors hover:bg-gold-soft sm:flex-row sm:items-center sm:justify-between sm:p-8"
+        >
+          <div>
+            <p className="eyebrow text-navy/70">Personal tax return</p>
+            <p className="serif mt-2 text-3xl font-semibold">Complete your tax questionnaire</p>
+            <p className="mt-1 text-navy/75">Answer a few questions and upload your slips — your progress saves automatically.</p>
+          </div>
+          <span className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-navy px-5 font-medium text-white">Open tax return →</span>
+        </Link>
+      ) : null}
 
       {next ? (
         <div className="flex flex-col gap-4 rounded-3xl bg-navy p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">

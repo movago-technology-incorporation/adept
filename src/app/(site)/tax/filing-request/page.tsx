@@ -45,12 +45,12 @@ export default function FilingRequestPage() {
           </span>
           <h2 className="serif mt-6 text-4xl leading-tight font-semibold">Start your return in the client portal</h2>
           <p className="mt-3 leading-relaxed text-white/70">
-            The questionnaire collects sensitive details like Social Insurance Numbers, so it’s only available to signed-in clients. It
+            The questionnaire collects sensitive details like Social Insurance Numbers, so it’s only available to invited, signed-in clients. It
             takes about 15 minutes, and your progress saves automatically.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/login?mode=signup" className={buttonClass("gold", "lg")}>
-              <UserPlus className="h-5 w-5" /> Create a free account
+            <Link href="/contact" className={buttonClass("gold", "lg")}>
+              <UserPlus className="h-5 w-5" /> Request portal access
             </Link>
             <Link href="/client/tax-return" className={buttonClass("light", "lg")}>
               <LogIn className="h-5 w-5" /> Sign in and continue

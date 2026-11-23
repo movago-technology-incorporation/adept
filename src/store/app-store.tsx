@@ -68,6 +68,7 @@ type AppState = AppData & {
   updateProposal: (id: string, patch: Partial<Proposal>) => Promise<void>;
   deleteProposal: (id: string) => Promise<void>;
   sendStaffEmail: (input: StaffEmailInput) => Promise<StaffEmailResult>;
+  deleteStaffEmails: (ids: string[]) => Promise<void>;
   addTestimonial: (item: Testimonial) => Promise<void>;
   updateTestimonial: (id: string, patch: Partial<Testimonial>) => Promise<void>;
   deleteTestimonial: (id: string) => Promise<void>;
@@ -313,6 +314,10 @@ export function AppProvider({
           }
         }
         return result;
+      },
+      deleteStaffEmails: (ids) => {
+        setStaffEmails((prev) => prev.filter((row) => !ids.includes(row.id)));
+        return persist(actions.deleteStaffEmails(ids));
       },
       deleteProposal: (id) => {
         setProposals((prev) => prev.filter((row) => row.id !== id));
