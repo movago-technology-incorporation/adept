@@ -17,10 +17,8 @@ export type TaxReturnRow = {
 export const returnId = (clientId: string, year: number) => `tr_${clientId}_${year}`;
 
 /** Years a client can file for: the last four completed tax years. */
-export function filingYears() {
-  const y = new Date().getFullYear();
-  return [y - 1, y - 2, y - 3, y - 4];
-}
+// Filing years and submit dates come from the Tax season settings.
+export { filingYears } from "./tax-season";
 
 const META = (sql: ReturnType<typeof db>) => sql;
 

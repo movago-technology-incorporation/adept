@@ -43,7 +43,18 @@ import {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function TaxReturnWizard({ year, initial, initialStep = 0 }: { year: number; initial: TaxReturnData; initialStep?: number }) {
+/** `submitOpensOn` (from Tax season settings): a readable date before which the return can be saved but not submitted. */
+export function TaxReturnWizard({
+  year,
+  initial,
+  initialStep = 0,
+  submitOpensOn = null,
+}: {
+  year: number;
+  initial: TaxReturnData;
+  initialStep?: number;
+  submitOpensOn?: string | null;
+}) {
   const router = useRouter();
   const [data, setData] = useState<TaxReturnData>(initial);
   const steps = activeSteps(data);
@@ -630,6 +641,13 @@ export function TaxReturnWizard({ year, initial, initialStep = 0 }: { year: numb
               <Alert>{submitError}</Alert>
             </div>
           ) : null}
+          {isLast && submitOpensOn ? (
+            <div className="mt-6">
+              <Alert tone="info">
+                You can submit your {year} return from {submitOpensOn}. Everything you’ve entered is saved, so come back then to submit, or keep adding slips as they arrive.
+              </Alert>
+            </div>
+          ) : null}
 
           <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex gap-2">
@@ -643,9 +661,9 @@ export function TaxReturnWizard({ year, initial, initialStep = 0 }: { year: numb
               </Link>
             </div>
             {isLast ? (
-              <Button size="lg" variant="gold" onClick={submit} loading={submitting}>
+              <Button size="lg" variant="gold" onClick={submit} loading={submitting} disabled={!!submitOpensOn}>
                 <ShieldCheck className="h-5 w-5" />
-                {submitting ? "Submitting…" : `Submit my ${year} return`}
+                {submitting ? "Submitting…" : submitOpensOn ? `Submitting opens ${submitOpensOn}` : `Submit my ${year} return`}
               </Button>
             ) : (
               <Button size="lg" onClick={next}>

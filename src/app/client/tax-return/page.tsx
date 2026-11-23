@@ -5,6 +5,7 @@ import { Badge, buttonClass, cx } from "@/components/ui/kit";
 import { requirePageRole } from "@/lib/auth/viewer";
 import { STEPS } from "@/lib/tax-return";
 import { filingYears, listClientReturns, type TaxReturnStatus } from "@/lib/tax-return-server";
+import { currentTaxYear } from "@/lib/tax-season";
 
 export const metadata = { title: "Tax return" };
 
@@ -19,6 +20,7 @@ export default async function TaxReturnsPage() {
   const viewer = await requirePageRole("client");
   const returns = await listClientReturns(viewer.clientId);
   const byYear = new Map(returns.map((r) => [r.taxYear, r]));
+  const [years, currentYear] = await Promise.all([filingYears(), currentTaxYear()]);
 
   return (
     <>
@@ -28,8 +30,9 @@ export default async function TaxReturnsPage() {
         description="Complete your tax questionnaire online and upload your slips — everything is saved as you go and stored securely."
       />
       <div className="grid gap-4 md:grid-cols-2">
-        {filingYears().map((year, i) => {
+        {years.map((year, i) => {
           const r = byYear.get(year);
+          const early = year === currentYear; // year still in progress (open from November)
           const s = r ? STATUS[r.status] : null;
           const pct = r?.status === "draft" ? Math.min(95, Math.round((Math.min(r.currentStep, STEPS.length - 1) / (STEPS.length - 1)) * 100)) : null;
           return (
@@ -42,12 +45,14 @@ export default async function TaxReturnsPage() {
                 <span className={cx("grid h-12 w-12 place-items-center rounded-2xl", i === 0 && !r ? "bg-gold text-navy" : "bg-sand text-navy")}>
                   <FileText className="h-5 w-5" />
                 </span>
-                {s ? <Badge tone={s.tone}>{s.label}</Badge> : i === 0 ? <Badge tone="gold">Most recent year</Badge> : null}
+                {s ? <Badge tone={s.tone}>{s.label}</Badge> : early ? <Badge tone="gold">Start early</Badge> : i === 0 ? <Badge tone="gold">Most recent year</Badge> : null}
               </div>
               <p className={cx("serif mt-5 text-3xl font-semibold", i === 0 && !r ? "text-white" : "text-navy")}>{year} tax return</p>
               <p className={cx("mt-1 text-sm", i === 0 && !r ? "text-white/70" : "text-muted")}>
                 {!r
-                  ? `For income earned January 1 – December 31, ${year}.`
+                  ? early
+                    ? `Get a head start on ${year}. Add slips as they arrive and submit once you have them all.`
+                    : `For income earned January 1 – December 31, ${year}.`
                   : r.status === "draft"
                     ? `Last saved ${r.updatedAt}.`
                     : `Submitted ${r.submittedAt}.`}

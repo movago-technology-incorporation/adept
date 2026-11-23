@@ -9,6 +9,7 @@ import { requirePageRole } from "@/lib/auth/viewer";
 import { db } from "@/lib/db";
 import { emptyReturn } from "@/lib/tax-return";
 import { filingYears, getClientReturn } from "@/lib/tax-return-server";
+import { submitOpensOn } from "@/lib/tax-season";
 
 export const metadata = { title: "Tax return" };
 
@@ -31,7 +32,7 @@ async function TaxReturnYearPageContent({ params }: { params: Promise<{ year: st
   const viewer = await requirePageRole("client");
   const { year: raw } = await params;
   const year = Number(raw);
-  if (!filingYears().includes(year)) notFound();
+  if (!(await filingYears()).includes(year)) notFound();
   const existing = await getClientReturn(viewer.clientId, year);
 
   if (!existing || existing.status === "draft") {
@@ -42,7 +43,7 @@ async function TaxReturnYearPageContent({ params }: { params: Promise<{ year: st
       const [firstName = "", ...rest] = String(c?.name ?? viewer.name).trim().split(/\s+/);
       initial = emptyReturn({ firstName, lastName: rest.join(" "), email: c?.email ?? viewer.email, phone: c?.phone ?? "" });
     }
-    return <TaxReturnWizard year={year} initial={initial} initialStep={existing?.currentStep ?? 0} />;
+    return <TaxReturnWizard year={year} initial={initial} initialStep={existing?.currentStep ?? 0} submitOpensOn={await submitOpensOn(year)} />;
   }
 
   const stage = STAGES.findIndex((s) => s.key === existing.status);

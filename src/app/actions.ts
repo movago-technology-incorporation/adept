@@ -16,6 +16,7 @@ import { getFirm } from "@/lib/data";
 import type { EmailRecipient } from "@/lib/email-recipients";
 import { normalizeReturn, validateAll, type TaxReturnData } from "@/lib/tax-return";
 import { currentStatus, filingYears, saveReturn } from "@/lib/tax-return-server";
+import { TAX_SEASON_TAG, normalizeSeason, submitOpensOn, type TaxSeason } from "@/lib/tax-season";
 import { deleteObject } from "@/lib/storage";
 import { notifyBooking, notifyEnquiry, notifyTaxReturnCompleted, notifyTaxReturnSubmitted, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
 import type { Appointment, Client, DocumentFile, FollowUp, Job, Lead, Proposal, StaffEmail, Testimonial, ThreadMessage } from "@/lib/types";
@@ -455,6 +456,17 @@ export async function deleteClient(id: string) {
   if (!result.ok) throw new Error(result.error);
 }
 
+/** Studio → Settings: when clients can start and submit each year's tax return. */
+export async function saveTaxSeason(input: TaxSeason) {
+  await requireStaff();
+  const season = normalizeSeason(input);
+  await db()`
+    INSERT INTO site_settings (key, value, updated_at) VALUES ('tax_season', ${JSON.stringify(season)}::jsonb, now())
+    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`;
+  updateTag(TAX_SEASON_TAG);
+  return season;
+}
+
 // Clients can’t delete their own account: they contact Adept, and staff remove it from Studio.
 
 const PROPOSAL_STATUSES = ["draft", "sent", "viewed", "changes requested", "accepted", "signed", "declined"];
@@ -591,7 +603,7 @@ type TaxActionResult = { ok: true } | { ok: false; error: string; step?: string;
 async function requireClientForYear(year: number) {
   const viewer = await requireSignedIn();
   if (viewer.role !== "client") throw new AuthError("Only client accounts can file a return here.");
-  if (!filingYears().includes(year)) throw new Error("That tax year isn’t available.");
+  if (!(await filingYears()).includes(year)) throw new Error("That tax year isn’t available.");
   return viewer;
 }
 
@@ -609,6 +621,8 @@ export async function submitTaxReturn(year: number, raw: TaxReturnData): Promise
   const viewer = await requireClientForYear(year);
   const status = await currentStatus(viewer.clientId, year);
   if (status && status !== "draft") return { ok: false, error: "This return has already been submitted." };
+  const opens = await submitOpensOn(year);
+  if (opens) return { ok: false, error: `You can submit your ${year} return from ${opens}. Your answers are saved until then.` };
   const data = normalizeReturn(raw);
   const problem = validateAll(data);
   if (problem) return { ok: false, error: "Some answers need attention.", step: problem.step, errors: problem.errors };

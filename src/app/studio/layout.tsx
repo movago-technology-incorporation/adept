@@ -40,6 +40,12 @@ const groups: PortalGroup[] = [
       { href: "/studio/testimonials", label: "Testimonials", icon: "chat" },
     ],
   },
+  {
+    title: "Admin",
+    links: [
+      { href: "/studio/settings", label: "Settings", icon: "settings" },
+    ],
+  },
 ];
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {

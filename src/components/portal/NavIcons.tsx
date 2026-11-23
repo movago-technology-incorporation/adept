@@ -9,6 +9,7 @@ import {
   Inbox,
   Landmark,
   ListChecks,
+  Settings,
   FileSignature,
   Mail,
   MessagesSquare,
@@ -40,5 +41,6 @@ export const iconMap = {
   mail: Mail,
   taxReturn: ClipboardCheck,
   checklist: ListChecks,
+  settings: Settings,
   agreement: FileSignature,
 };
