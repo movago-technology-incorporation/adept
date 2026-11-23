@@ -17,7 +17,7 @@ import type { EmailRecipient } from "@/lib/email-recipients";
 import { normalizeReturn, validateAll, type TaxReturnData } from "@/lib/tax-return";
 import { currentStatus, filingYears, saveReturn } from "@/lib/tax-return-server";
 import { deleteObject } from "@/lib/storage";
-import { notifyAccountDeleted, notifyBooking, notifyEnquiry, notifyTaxReturnCompleted, notifyTaxReturnSubmitted, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
+import { notifyBooking, notifyEnquiry, notifyTaxReturnCompleted, notifyTaxReturnSubmitted, processDueFollowUps, sendFollowUpNow, siteUrl } from "@/lib/notify";
 import type { Appointment, Client, DocumentFile, FollowUp, Job, Lead, Proposal, StaffEmail, Testimonial, ThreadMessage } from "@/lib/types";
 
 // Authorization model
@@ -455,18 +455,7 @@ export async function deleteClient(id: string) {
   if (!result.ok) throw new Error(result.error);
 }
 
-/** Client: permanently deletes their own account. Requires typing DELETE. */
-export async function deleteMyAccount(confirmation: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const viewer = await requireSignedIn();
-  if (viewer.role !== "client") return { ok: false, error: "Staff accounts can’t be deleted here." };
-  if (confirmation.trim().toUpperCase() !== "DELETE") return { ok: false, error: "Type DELETE to confirm." };
-  const [client] = await db()`SELECT name FROM clients WHERE id = ${viewer.clientId}`;
-  const result = await purgeClient(viewer.clientId, "Client closed their Adept account");
-  if (!result.ok) return { ok: false, error: "We couldn’t delete your account. Please contact us." };
-  const site = await siteUrl();
-  after(() => notifyAccountDeleted({ name: client?.name || viewer.name, email: viewer.email }, site));
-  return { ok: true };
-}
+// Clients can’t delete their own account: they contact Adept, and staff remove it from Studio.
 
 const PROPOSAL_STATUSES = ["draft", "sent", "viewed", "changes requested", "accepted", "signed", "declined"];
 
