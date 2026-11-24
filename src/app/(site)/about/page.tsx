@@ -72,7 +72,7 @@ export default function AboutPage() {
           <dl className="grid gap-3 sm:grid-cols-3">
             {[
               ["98%", "On-time filings"],
-              ["120+", "Canadian clients served"],
+              ["1000+", "Canadian clients served"],
               ["4.9", "Average review score"],
             ].map(([n, l]) => (
               <div key={l} className="rounded-3xl bg-white/6 p-6">

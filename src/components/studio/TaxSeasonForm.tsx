@@ -48,8 +48,12 @@ export function TaxSeasonForm({ initial, today }: { initial: TaxSeason; today: {
   const dirty = JSON.stringify(current) !== JSON.stringify(initial);
 
   // Live preview of what clients see today with these settings.
+  const manual = current.mode === "manual";
   const open = today.md >= current.openFrom;
-  const years = [...(open ? [today.year] : []), ...Array.from({ length: current.pastYears }, (_, i) => today.year - 1 - i)];
+  const years = manual
+    ? Array.from({ length: current.pastYears + 1 }, (_, i) => current.latestYear - i)
+    : [...(open ? [today.year] : []), ...Array.from({ length: current.pastYears }, (_, i) => today.year - 1 - i)];
+  const yearChoices = Array.from({ length: 8 }, (_, i) => today.year + 2 - i);
 
   const save = async () => {
     setBusy(true);
@@ -81,10 +85,56 @@ export function TaxSeasonForm({ initial, today }: { initial: TaxSeason; today: {
 
         <div className="mt-8 grid gap-7">
           <div>
-            <p className="font-semibold text-navy">Open next year’s return from</p>
-            <p className="mb-3 text-sm text-muted">Each year from this date, clients can start that year’s questionnaire early and upload slips as they arrive.</p>
-            <MonthDay label="Open from" value={s.openFrom} onChange={(v) => setS((p) => ({ ...p, openFrom: v }))} />
+            <p className="font-semibold text-navy">Which tax years clients see</p>
+            <div className="mt-3 grid grid-cols-2 gap-1 rounded-2xl bg-sand p-1">
+              {(
+                [
+                  ["auto", "Automatic"],
+                  ["manual", "Choose years"],
+                ] as const
+              ).map(([m, label]) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setS((p) => ({ ...p, mode: m }))}
+                  className={cx("cursor-pointer rounded-xl py-2.5 text-sm font-medium transition-colors", s.mode === m ? "bg-navy text-white" : "text-navy hover:bg-sand-2")}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-sm text-muted">
+              {manual ? "You pick the newest tax year. It stays until you change it." : "Years move forward on their own each year, using the opening date below."}
+            </p>
           </div>
+
+          {manual ? (
+            <div>
+              <p className="font-semibold text-navy">Newest tax year</p>
+              <p className="mb-3 text-sm text-muted">The most recent year clients can start a return for.</p>
+              <div className="flex flex-wrap gap-2">
+                {yearChoices.map((y) => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => setS((p) => ({ ...p, latestYear: y }))}
+                    className={cx(
+                      "h-10 cursor-pointer rounded-full px-4 text-sm font-medium transition-colors",
+                      s.latestYear === y ? "bg-navy text-white" : "bg-sand text-navy hover:bg-sand-2",
+                    )}
+                  >
+                    {y}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className="font-semibold text-navy">Open next year’s return from</p>
+              <p className="mb-3 text-sm text-muted">Each year from this date, clients can start that year’s questionnaire early and upload slips as they arrive.</p>
+              <MonthDay label="Open from" value={s.openFrom} onChange={(v) => setS((p) => ({ ...p, openFrom: v }))} />
+            </div>
+          )}
 
           <div>
             <label className="flex cursor-pointer items-start gap-3">
@@ -102,7 +152,7 @@ export function TaxSeasonForm({ initial, today }: { initial: TaxSeason; today: {
           </div>
 
           <div>
-            <p className="font-semibold text-navy">Past years clients can file</p>
+            <p className="font-semibold text-navy">{manual ? "Earlier years to include" : "Past years clients can file"}</p>
             <p className="mb-3 text-sm text-muted">For catching up on late returns.</p>
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -146,7 +196,7 @@ export function TaxSeasonForm({ initial, today }: { initial: TaxSeason; today: {
               <li key={y} className="flex items-center justify-between gap-3 rounded-2xl bg-white/8 px-4 py-3">
                 <span className="font-semibold">
                   {y} tax return
-                  {y === today.year ? <span className="ml-2 text-xs font-normal text-gold-soft">Start early</span> : null}
+                  {y >= today.year ? <span className="ml-2 text-xs font-normal text-gold-soft">Start early</span> : null}
                 </span>
                 {lockedNow ? (
                   <span className="inline-flex items-center gap-1.5 text-xs text-white/70">
@@ -159,7 +209,7 @@ export function TaxSeasonForm({ initial, today }: { initial: TaxSeason; today: {
             );
           })}
         </ul>
-        {!open ? (
+        {!manual && !open ? (
           <p className="mt-4 text-sm text-white/60">
             {today.year} opens on {readable(current.openFrom, today.year)}.
           </p>

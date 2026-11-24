@@ -227,10 +227,10 @@ function SessionCard({ pick, children }: { pick: Pick | null; children?: React.R
       {d && pick ? (
         <>
           <p className="serif mt-4 text-3xl leading-tight font-semibold">
-            {d.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
+            {d.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric", timeZone: pick.timeZone })}
           </p>
           <p className="mt-2 text-lg text-white/80">
-            {d.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" })} · {pick.length} min
+            {d.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", timeZone: pick.timeZone })} · {pick.length} min
           </p>
           <p className="mt-1 text-sm text-white/50">{pick.timeZone.replace(/_/g, " ")} · Video call</p>
         </>

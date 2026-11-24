@@ -5,22 +5,30 @@ import { db } from "./db";
 // Tax season rules, set by Adept in Studio → Settings (site_settings key "tax_season").
 
 export type TaxSeason = {
-  /** "MM-DD": from this day each year, clients can start that year's return early. */
+  /** "auto": years follow the calendar and `openFrom`. "manual": Adept picks the newest year (`latestYear`). */
+  mode: "auto" | "manual";
+  /** Manual mode: the newest tax year clients can work on (e.g. 2027). */
+  latestYear: number;
+  /** "MM-DD": from this day each year, clients can start that year's return early (auto mode). */
   openFrom: string;
   /** "MM-DD" in the following year when a return can be submitted; "" = any time. */
   submitFrom: string;
-  /** How many finished years clients can file. */
+  /** How many years before the newest one clients can file. */
   pastYears: number;
 };
 
 export const TAX_SEASON_TAG = "tax-season";
-export const DEFAULT_TAX_SEASON: TaxSeason = { openFrom: "11-01", submitFrom: "01-01", pastYears: 4 };
+const thisYear = () => Number(new Date().toLocaleDateString("en-CA", { timeZone: "America/Edmonton" }).slice(0, 4));
+export const DEFAULT_TAX_SEASON: Omit<TaxSeason, "latestYear"> = { mode: "auto", openFrom: "11-01", submitFrom: "01-01", pastYears: 4 };
 
 const MD = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 export function normalizeSeason(raw: unknown): TaxSeason {
   const v = (raw && typeof raw === "object" ? raw : {}) as Partial<TaxSeason>;
+  const latest = Math.round(Number(v.latestYear));
   return {
+    mode: v.mode === "manual" ? "manual" : "auto",
+    latestYear: latest >= 2000 && latest <= 2100 ? latest : thisYear() - 1,
     openFrom: typeof v.openFrom === "string" && MD.test(v.openFrom) ? v.openFrom : DEFAULT_TAX_SEASON.openFrom,
     submitFrom: v.submitFrom === "" ? "" : typeof v.submitFrom === "string" && MD.test(v.submitFrom) ? v.submitFrom : DEFAULT_TAX_SEASON.submitFrom,
     pastYears: Math.min(10, Math.max(1, Math.round(Number(v.pastYears) || DEFAULT_TAX_SEASON.pastYears))),
@@ -44,9 +52,13 @@ function today() {
 const label = (year: number, md: string) =>
   new Date(`${year}-${md}T12:00:00Z`).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
 
-/** Years a client can work on: the current year (once it opens) and the finished years. */
+/**
+ * Years a client can work on. Auto: the current year (once it opens) plus finished years.
+ * Manual: the newest year Adept chose plus the years before it.
+ */
 export async function filingYears() {
   const s = await getTaxSeason();
+  if (s.mode === "manual") return Array.from({ length: s.pastYears + 1 }, (_, i) => s.latestYear - i);
   const { year, md } = today();
   const past = Array.from({ length: s.pastYears }, (_, i) => year - 1 - i);
   return md >= s.openFrom ? [year, ...past] : past;

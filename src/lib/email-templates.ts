@@ -332,7 +332,7 @@ export const templates = {
         },
         {
           type: "quote" as const,
-          text: "Happy with how it went? A short review helps other individuals and small businesses find us. It takes about a minute.",
+          text: "Thank you for trusting Adept. If we made tax season lighter, a quick Google review helps others find us.",
         },
       ],
       cta: { label: "Write a review", href: p.reviewUrl },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import { getMeetingTypes, getOpenTimes } from "@/app/actions";
 import { cx, Spinner } from "@/components/ui/kit";
 import type { EventType } from "@/lib/cal";
@@ -8,6 +8,16 @@ import type { EventType } from "@/lib/cal";
 export type Pick = { eventTypeId: number; start: string; length: number; timeZone: string };
 
 const WINDOW_DAYS = 14;
+const FIRM_TZ = "America/Edmonton";
+
+/** The visitor's own time zone, read in the browser only (the server runs in UTC). */
+function detectTimeZone() {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // Browsers with fingerprinting protection report UTC; Calgary time is a better guess for Adept's clients.
+  return !tz || /^(UTC|Etc\/UTC|Etc\/GMT|GMT)$/i.test(tz) ? FIRM_TZ : tz;
+}
+const noSubscribe = () => () => {};
+const useTimeZone = () => useSyncExternalStore(noSubscribe, detectTimeZone, () => null);
 
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -35,7 +45,7 @@ export function Scheduler({
   const [day, setDay] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, startLoading] = useTransition();
-  const timeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Edmonton", []);
+  const timeZone = useTimeZone(); // null during server render and hydration
   const chip = tone === "white" ? "bg-sand" : "bg-white";
 
   useEffect(() => {
@@ -56,7 +66,7 @@ export function Scheduler({
   const todayKey = useMemo(() => isoDay(new Date()), []);
 
   useEffect(() => {
-    if (!typeId) return;
+    if (!typeId || !timeZone) return;
     startLoading(async () => {
       try {
         setError(null);
@@ -82,9 +92,9 @@ export function Scheduler({
 
   const type = types?.find((t) => t.id === typeId);
   const times = (day && days?.[day]) || [];
-  const tzLabel = timeZone.replace(/_/g, " ").split("/").pop();
+  const tzLabel = (timeZone ?? FIRM_TZ).replace(/_/g, " ").split("/").pop();
 
-  if (!types) {
+  if (!types || !timeZone) {
     return error ? <p className="text-sm text-danger">{error}</p> : <Loading />;
   }
   if (types.length === 0) {
@@ -193,13 +203,13 @@ export function Scheduler({
                 <button
                   key={iso}
                   type="button"
-                  onClick={() => onChange({ eventTypeId: typeId!, start: iso, length: type?.length ?? 30, timeZone })}
+                  onClick={() => onChange({ eventTypeId: typeId!, start: iso, length: type?.length ?? 30, timeZone: timeZone! })}
                   className={cx(
                     "min-w-0 rounded-xl px-2 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
                     active ? "bg-gold text-navy" : cx(chip, "text-navy hover:bg-gold-soft"),
                   )}
                 >
-                  {new Date(iso).toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" })}
+                  {new Date(iso).toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", timeZone })}
                 </button>
               );
             })}
@@ -244,8 +254,9 @@ function Loading() {
 
 export function describePick(pick: Pick) {
   const d = new Date(pick.start);
-  return `${d.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })} at ${d.toLocaleTimeString("en-CA", {
+  return `${d.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric", timeZone: pick.timeZone })} at ${d.toLocaleTimeString("en-CA", {
     hour: "numeric",
     minute: "2-digit",
+    timeZone: pick.timeZone,
   })} · ${pick.length} min`;
 }

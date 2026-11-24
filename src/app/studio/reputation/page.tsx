@@ -14,6 +14,15 @@ type Row = Job & { client: string };
 const h = columnsFor<Row>();
 const reviewLink = reviewUrl();
 
+/** Review-request wording: tax clients, and everyone else (bookkeeping, payroll and other services). */
+const REVIEW_MESSAGES = [
+  { type: "Tax services", text: "Thank you for trusting Adept. If we made tax season lighter, a quick Google review helps others find us." },
+  {
+    type: "General services",
+    text: "Thank you for trusting Adept. If we made your bookkeeping easier, a quick Google review helps other Alberta businesses find us.",
+  },
+];
+
 export default function ReputationPage() {
   const { clients, jobs, completeJob, remindReview } = useApp();
 
@@ -126,11 +135,15 @@ export default function ReputationPage() {
           </>
         )}
       />
-      <Card title="Message clients receive">
-        <p className="rounded-2xl bg-sand p-4 text-sm leading-relaxed text-ink/85">
-          “Thank you for trusting Adept. If we made tax season lighter, a quick Google review helps other Alberta businesses
-          find us.”
-        </p>
+      <Card title="Messages clients receive">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {REVIEW_MESSAGES.map((m) => (
+            <div key={m.type} className="rounded-2xl bg-sand p-4">
+              <p className="text-xs font-semibold tracking-wide text-muted uppercase">{m.type}</p>
+              <p className="mt-2 text-sm leading-relaxed text-ink/85">“{m.text}”</p>
+            </div>
+          ))}
+        </div>
         <p className="mt-3 text-xs break-all text-muted">{reviewLink}</p>
       </Card>
     </div>

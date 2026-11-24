@@ -32,7 +32,7 @@ export default async function TaxReturnsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {years.map((year, i) => {
           const r = byYear.get(year);
-          const early = year === currentYear; // year still in progress (open from November)
+          const early = year >= currentYear; // year not finished yet (opened early)
           const s = r ? STATUS[r.status] : null;
           const pct = r?.status === "draft" ? Math.min(95, Math.round((Math.min(r.currentStep, STEPS.length - 1) / (STEPS.length - 1)) * 100)) : null;
           return (
