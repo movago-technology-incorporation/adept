@@ -21,7 +21,7 @@ export default function TaxPlanningPage() {
         lead="Financial planning through a tax-conscious lens. We use the Income Tax Act and provincial rules — legally — to reduce what you owe, with a clear understanding of Alberta’s rules and Calgary’s business needs."
         crumbs={[{ href: "/tax", label: "Tax services" }]}
       />
-      <ContentPage>
+      <ContentPage askFrom="/tax/planning">
         <h2>Strategies we work through</h2>
         <ul>
           <li>Credits for students, seniors, first-time homebuyers, working parents and persons with disabilities</li>

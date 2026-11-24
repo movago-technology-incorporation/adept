@@ -49,7 +49,7 @@ export async function createLead(lead: Lead) {
 
   // Website enquiries: acknowledge the visitor and alert the team (after the response is sent).
   if (viewer?.role !== "staff") {
-    const kind = lead.page === "/tax/filing-request" ? "filing" : lead.page === "/contact" ? "contact" : null;
+    const kind = lead.page === "/tax/filing-request" ? "filing" : lead.page === "/contact" ? "contact" : lead.page === "/ask" ? "question" : null;
     if (kind) {
       const site = await siteUrl();
       const saved = { id: lead.id, name, email, phone: text(lead.phone, 50), company: text(lead.company, 200), interest: text(lead.interest, 200), notes: text(lead.notes) };

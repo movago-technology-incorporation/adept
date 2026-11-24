@@ -21,7 +21,7 @@ export default function CorpTaxPage() {
         lead="Once you incorporate, how you take money out changes — salary, dividends or a shareholder loan. We guide the tax implications before money moves."
         crumbs={[{ href: "/tax", label: "Tax services" }]}
       />
-      <ContentPage>
+      <ContentPage askFrom="/tax/corporation">
         <p>The CRA watches shareholder loans closely. We make sure every withdrawal is planned, documented and defensible.</p>
 
         <h2>What we’ll need</h2>

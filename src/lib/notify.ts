@@ -59,19 +59,21 @@ export async function notifyClientRegistered(client: { name: string; email: stri
 
 export async function notifyEnquiry(
   lead: { id: string; name: string; email: string; phone?: string; company?: string; interest: string; notes: string },
-  kind: "contact" | "filing",
+  kind: "contact" | "filing" | "question",
   base: string,
 ) {
+  // Questions from the tax pages go to the tax inbox; other questions to the general one.
+  const inbox: Inbox = kind === "filing" || (kind === "question" && /tax/i.test(lead.interest)) ? "tax" : "general";
   await send(
     kind === "filing" ? "filing-request" : "contact",
     lead.email,
-    templates.enquiryReceived({ name: lead.name, interest: lead.interest, message: lead.notes, kind }),
-    { replyTo: inboxFor(kind === "filing" ? "tax" : "general") },
+    templates.enquiryReceived({ name: lead.name, interest: lead.interest, message: lead.notes, kind: kind === "filing" ? "filing" : "contact" }),
+    { replyTo: inboxFor(inbox) },
   );
   await alertAdmin(
     {
-      title: kind === "filing" ? "New tax filing request" : "New website enquiry",
-      summary: `${lead.name} ${kind === "filing" ? "submitted a tax filing request" : "sent a message through the website"}.`,
+      title: kind === "filing" ? "New tax filing request" : kind === "question" ? `New question: ${lead.interest}` : "New website enquiry",
+      summary: `${lead.name} ${kind === "filing" ? "submitted a tax filing request" : kind === "question" ? `asked a question about ${lead.interest.toLowerCase()}` : "sent a message through the website"}.`,
       rows: [
         ["Name", lead.name],
         ["Email", lead.email],
@@ -83,7 +85,7 @@ export async function notifyEnquiry(
       link: `${base}/studio/leads/${lead.id}`,
     },
     lead.email,
-    kind === "filing" ? "tax" : "general",
+    inbox,
   );
 }
 

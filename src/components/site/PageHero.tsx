@@ -53,22 +53,43 @@ export function PageHero({
 }
 
 /** Long-form service page: prose on the left, a sticky booking card on the right. */
-export function ContentPage({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
+/** `askFrom`: the page path, so the default card links to the short question form for that topic. */
+export function ContentPage({ children, aside, askFrom }: { children: ReactNode; aside?: ReactNode; askFrom?: string }) {
   return (
     <Container className="grid gap-12 py-16 sm:py-20 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
       <article className="prose-adept max-w-3xl">{children}</article>
-      <aside className="lg:sticky lg:top-28 lg:self-start">{aside ?? <ConsultCard />}</aside>
+      <aside className="lg:sticky lg:top-28 lg:self-start">{aside ?? <ConsultCard askFrom={askFrom} />}</aside>
     </Container>
   );
 }
 
+/**
+ * Sidebar call-to-action. With `askFrom` (tax pages) it shows only "Ask a question",
+ * which opens the short question form for that page's topic instead of the main contact form.
+ */
 export function ConsultCard({
   title = "Talk it through with Adept",
   body = "A free working session to review your books, filings and deadlines — and what we’d do next.",
+  askFrom,
 }: {
   title?: string;
   body?: string;
+  askFrom?: string;
 }) {
+  if (askFrom) {
+    return (
+      <div className="rounded-3xl bg-navy p-7 text-white">
+        <p className="eyebrow text-gold-soft">Questions?</p>
+        <p className="serif mt-3 text-3xl leading-tight font-semibold">Ask us anything</p>
+        <p className="mt-3 text-sm leading-relaxed text-white/65">Send a quick question and we’ll get back to you within one business day.</p>
+        <div className="mt-6 grid gap-2">
+          <ButtonLink href={`/ask?from=${encodeURIComponent(askFrom)}`} variant="gold">
+            Ask a question
+          </ButtonLink>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="rounded-3xl bg-navy p-7 text-white">
       <p className="eyebrow text-gold-soft">Free consultation</p>

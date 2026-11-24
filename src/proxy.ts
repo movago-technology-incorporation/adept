@@ -15,6 +15,7 @@ export default auth.middleware({
     "/testimonials",
     "/book",
     "/contact",
+    "/ask",
     "/login",
     "/register",
     "/proposal",

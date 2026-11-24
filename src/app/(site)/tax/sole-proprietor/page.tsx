@@ -21,7 +21,7 @@ export default function SolePropPage() {
         lead="The CRA treats any activity carried out to make a profit as a business. As a sole proprietor, you’re a business — and your own employer."
         crumbs={[{ href: "/tax", label: "Tax services" }]}
       />
-      <ContentPage>
+      <ContentPage askFrom="/tax/sole-proprietor">
         <h2>What you need to know</h2>
         <p>
           Track every form of income: sales, goods, services received or property. Special rules apply to farming, fishing

@@ -23,10 +23,7 @@ export default function IndividualTaxPage() {
       />
       <ContentPage
         aside={
-          <ConsultCard
-            title="Ready to file your T1?"
-            body="Send us your details through a confidential filing request, or book a call first."
-          />
+          <ConsultCard askFrom="/tax/individual" />
         }
       >
         <h2>Nobody wants penalties over a mistake</h2>
